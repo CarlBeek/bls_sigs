@@ -5,6 +5,9 @@ class Fq(int):
         ret.q = q
         return ret
 
+    def __str__(self):
+        return super().__str__()
+
     def __add__(self, other):
         return Fq(super().__add__(other), self.q)
 
@@ -77,11 +80,60 @@ class Fq2(tuple):
         c0 = aa - bb
         return Fq2(c0, c1)
 
+    def __str__(self):
+        return str(self[1]) + '*u + ' + str(self[0])
+
+    def mul_by_nonresidue(self):
+        return Fq2(self[0] - self[1], self[0] + self[1])
+
     def inverse(self):
-        t1 = self[0]
+        raise NotImplementedError
+
+
+class Fq6(tuple):
+    def __new__(cls, c0, c1, c2):
+        ret = super().__new__(cls, (c0, c1, c2))
+        ret.q = c0.q
+        return ret
+
+    def __neg__(self):
+        c0 = -self[0]
+        c1 = -self[1]
+        c2 = -self[2]
+        return Fq6(c0, c1, c2)
+
+    def __add__(self, other):
+        c0 = self[0] + other[0]
+        c1 = self[1] + other[1]
+        c2 = self[2] + other[2]
+        return Fq6(c0, c1, c2)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __sub__(self, other):
+        c0 = self[0] - other[0]
+        c1 = self[1] - other[1]
+        c2 = self[2] - other[2]
+        return Fq6(c0, c1, c2)
+
+    def __rsub__(self, other):
+        c0 = other[0] - self[0]
+        c1 = other[1] - self[1]
+        c2 = other[2] - self[2]
+        return Fq6(c0, c1, c2)
+
+    def __str__(self):
+        a = [element for tupl in self for element in tupl]
+        c = 5
+        a = list(map(lambda x: str(x) + 'u^' + str(c), a[::-1]))
+        return str(a)
 
 
 if __name__ == '__main__':
     a = Fq2(Fq(3, 17), Fq(4, 17))
     b = Fq2(Fq(5, 17), Fq(11, 17))
-    print(a*b)
+    c = Fq2(Fq(8, 17), Fq(14, 17))
+
+    d = Fq6(a, b, c)
+    print(d)
