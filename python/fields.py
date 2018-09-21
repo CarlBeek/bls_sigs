@@ -165,7 +165,31 @@ class Fq6(tuple):
         return Fq6(t1, t2, t3)
 
 
-class
+class Fq12(tuple):
+    def __new__(cls, c0, c1):
+        ret = super().__new__(cls, (c0, c1))
+        ret.q = c0.q
+        return ret
+
+    def __neg__(self):
+        c0 = -self[0]
+        c1 = -self[1]
+        return Fq12(c0, c1)
+
+    def __add__(self, other):
+        c0 = self[0] + other[0]
+        c1 = self[1] + other[1]
+        return Fq12(c0, c1)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __sub__(self, other):
+        return self + -other
+
+    def __rsub__(self, other):
+        return other + -self
+
 
 
 
