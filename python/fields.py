@@ -123,11 +123,50 @@ class Fq6(tuple):
         c2 = other[2] - self[2]
         return Fq6(c0, c1, c2)
 
-    def __str__(self):
-        a = [element for tupl in self for element in tupl]
-        c = 5
-        a = list(map(lambda x: str(x) + 'u^' + str(c), a[::-1]))
-        return str(a)
+    def __mul__(self, other):
+        aa = self[0]
+        bb = self[1]
+        cc = self[2]
+
+        aa *= other[0]
+        bb *= other[1]
+        cc *= other[2]
+
+        # t1
+        t1 = other[1]
+        t1 += other[2]
+        tmp = self[1]
+        tmp += self[2]
+        t1 *= tmp
+        t1 -= bb
+        t1 -= cc
+        t1 = t1.mul_by_nonresidue()
+        t1 += aa
+
+        # t3
+        t3 = other[0]
+        t3 += other[2]
+        tmp = self[0]
+        tmp += self[2]
+        t3 *= tmp
+        t3 -= aa
+        t3 += bb
+        t3 -= cc
+
+        # t2
+        t2 = other[0]
+        tmp = self[0]
+        tmp += self[1]
+        t2 *= tmp
+        t2 -= aa
+        t2 -= bb
+        t2 += cc.mul_by_nonresidue()
+
+        return Fq6(t1, t2, t3)
+
+
+class
+
 
 
 if __name__ == '__main__':
