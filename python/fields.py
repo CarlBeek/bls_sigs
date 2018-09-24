@@ -71,7 +71,7 @@ class Fq2(tuple):
 
     def __mul__(self, other):
         aa = self[0] * other[0]
-        bb = self[0] * other[1]
+        bb = self[1] * other[1]
         o = other[0] + other[1]
         c1 = self[1] + self[0]
         c1 *= o
@@ -80,6 +80,9 @@ class Fq2(tuple):
         c0 = aa - bb
         return Fq2(c0, c1)
 
+    def __truediv__(self, other):
+        return self * other.inverse()
+
     def __str__(self):
         return str(self[1]) + '*u + ' + str(self[0])
 
@@ -87,7 +90,14 @@ class Fq2(tuple):
         return Fq2(self[0] - self[1], self[0] + self[1])
 
     def inverse(self):
-        raise NotImplementedError
+        t1 = self[1] * self[1]
+        t0 = self[0] * self[0]
+        t0 += t1
+        t0 = t0.inverse()
+        a = self[0]*t0
+        b = self[1]*t0
+        b = -b
+        return Fq2(a, b)
 
 
 class Fq6(tuple):
@@ -164,6 +174,9 @@ class Fq6(tuple):
 
         return Fq6(t1, t2, t3)
 
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
 
 class Fq12(tuple):
     def __new__(cls, c0, c1):
@@ -199,4 +212,7 @@ if __name__ == '__main__':
     c = Fq2(Fq(8, 17), Fq(14, 17))
 
     d = Fq6(a, b, c)
-    print(d)
+    e = Fq6(c, b, a)
+
+    f = Fq12(d, e)
+    print(a/a)
