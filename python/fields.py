@@ -84,7 +84,7 @@ class Fq2(tuple):
         return self * other.inverse()
 
     def __str__(self):
-        return str(self[1]) + '*u + ' + str(self[0])
+        return 'Fq2(' + str(self[0]) + ' + ' + str(self[1]) + ' * u)'
 
     def mul_by_nonresidue(self):
         return Fq2(self[0] - self[1], self[0] + self[1])
@@ -177,6 +177,37 @@ class Fq6(tuple):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __str__(self):
+        return 'Fq6(' + str(self[0]) + ' + ' + str(self[1]) + ' * v + ' + str(self[2]) + ' * v^2)'
+
+    def inverse(self):
+        c0 = self[2]
+        c0 = c0.mul_by_nonresidue()
+        c0 += self[1]
+        c0 = -c0
+        c0 += self[0]*self[0]
+
+        c1 = self[2]
+        c1 = c1*c1
+        c1 = c1.mul_by_nonresidue()
+        c1 -= self[0]*self[1]
+
+        c2 = self[1]
+        c2 = c2*c2
+        c2 -= self[0]*self[2]
+
+        tmp1 = self[2]*c1
+        tmp2 = self[1]*c2
+        tmp1 += tmp2
+        tmp1 = tmp1.mul_by_nonresidue()
+        tmp2 = self[0]*c0
+        tmp1 += tmp2
+
+        tmp = tmp1.inverse()
+        c0 *= tmp
+        c1 *= tmp
+        c2 *= tmp
+        return Fq6(c0, c1, c2)
 
 class Fq12(tuple):
     def __new__(cls, c0, c1):
@@ -203,6 +234,9 @@ class Fq12(tuple):
     def __rsub__(self, other):
         return other + -self
 
+    def __str__(self):
+        return 'Fq12(' + str(self[0]) + ' + ' + str(self[1]) + ' * w)'
+
 
 
 
@@ -215,4 +249,5 @@ if __name__ == '__main__':
     e = Fq6(c, b, a)
 
     f = Fq12(d, e)
-    print(a/a)
+    print(d)
+    print(d.inverse()*d)
