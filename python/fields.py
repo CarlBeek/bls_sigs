@@ -228,6 +228,13 @@ class Fq6(tuple):
     def is_one(self):
         return self[0].is_one() and self[1].is_zero() and self[2].is_zero()
 
+    def mul_by_nonresidue(self):
+        c0 = self[2]
+        c1 = self[0]
+        c2 = self[1]
+        c0 = c0.mul_by_nonresidue()
+        return Fq6(c0, c1, c2)
+
 
 class Fq12(tuple):
     def __new__(cls, c0, c1):
@@ -254,8 +261,38 @@ class Fq12(tuple):
     def __rsub__(self, other):
         return other + -self
 
+    def __mul__(self, other):
+        aa = self[0] * other[0]
+        bb = self[1] * other[1]
+        o = other[0] + other[1]
+        c1 = self[1] + self[0]
+        c1 *= o
+        c1 -= aa
+        c1 -= bb
+        c0 = bb.mul_by_nonresidue()
+        c0 += aa
+        return Fq12(c0, c1)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __truediv__(self, other):
+        return self * other.inverse()
+
     def __str__(self):
         return 'Fq12(' + str(self[0]) + ' + ' + str(self[1]) + ' * w)'
+
+    def inverse(self):
+        c0 = self[0] * self[0]
+        c1 = self[1] * self[1]
+        c1 = c1.mul_by_nonresidue()
+        c0 -= c1
+
+        t = c0.inverse()
+        t0 = t * self[0]
+        t1 = t * self[1]
+        t1 = -t1
+        return Fq12(t0, t1)
 
     def is_zero(self):
         return self[0].is_zero() and self[1].is_zero()
@@ -275,5 +312,5 @@ if __name__ == '__main__':
     e = Fq6(c, b, a)
 
     f = Fq12(d, e)
-    print(d)
-    print((d/d).is_one())
+    print(f)
+    print((f/f).is_one())
