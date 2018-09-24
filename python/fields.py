@@ -145,8 +145,7 @@ class Fq6(tuple):
         # t1
         t1 = other[1]
         t1 += other[2]
-        tmp = self[1]
-        tmp += self[2]
+        tmp = self[1] + self[2]
         t1 *= tmp
         t1 -= bb
         t1 -= cc
@@ -156,8 +155,7 @@ class Fq6(tuple):
         # t3
         t3 = other[0]
         t3 += other[2]
-        tmp = self[0]
-        tmp += self[2]
+        tmp = self[0] + self[2]
         t3 *= tmp
         t3 -= aa
         t3 += bb
@@ -165,8 +163,8 @@ class Fq6(tuple):
 
         # t2
         t2 = other[0]
-        tmp = self[0]
-        tmp += self[1]
+        t2 += other[1]
+        tmp = self[0] + self[1]
         t2 *= tmp
         t2 -= aa
         t2 -= bb
@@ -177,18 +175,21 @@ class Fq6(tuple):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __truediv__(self, other):
+        return self * other.inverse()
+
     def __str__(self):
         return 'Fq6(' + str(self[0]) + ' + ' + str(self[1]) + ' * v + ' + str(self[2]) + ' * v^2)'
 
     def inverse(self):
         c0 = self[2]
         c0 = c0.mul_by_nonresidue()
-        c0 += self[1]
+        c0 *= self[1]
         c0 = -c0
         c0 += self[0]*self[0]
 
         c1 = self[2]
-        c1 = c1*c1
+        c1 *= c1
         c1 = c1.mul_by_nonresidue()
         c1 -= self[0]*self[1]
 
@@ -203,11 +204,12 @@ class Fq6(tuple):
         tmp2 = self[0]*c0
         tmp1 += tmp2
 
-        tmp = tmp1.inverse()
-        c0 *= tmp
-        c1 *= tmp
-        c2 *= tmp
+        tmp1 = tmp1.inverse()
+        c0 *= tmp1
+        c1 *= tmp1
+        c2 *= tmp1
         return Fq6(c0, c1, c2)
+
 
 class Fq12(tuple):
     def __new__(cls, c0, c1):
@@ -250,4 +252,4 @@ if __name__ == '__main__':
 
     f = Fq12(d, e)
     print(d)
-    print(d.inverse()*d)
+    print(d/d)
