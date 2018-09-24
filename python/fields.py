@@ -47,6 +47,12 @@ class Fq(int):
     def square(self):
         return self * self
 
+    def is_zero(self):
+        return self == 0
+
+    def is_one(self):
+        return self == 1
+
 
 class Fq2(tuple):
     def __new__(cls, c0: Fq, c1: Fq):
@@ -98,6 +104,12 @@ class Fq2(tuple):
         b = self[1]*t0
         b = -b
         return Fq2(a, b)
+
+    def is_zero(self):
+        return self[0].is_zero() and self[1].is_zero()
+
+    def is_one(self):
+        return self[0].is_one() and self[1].is_zero()
 
 
 class Fq6(tuple):
@@ -210,6 +222,12 @@ class Fq6(tuple):
         c2 *= tmp1
         return Fq6(c0, c1, c2)
 
+    def is_zero(self):
+        return self[0].is_zero() and self[1].is_zero() and self[2].is_zero()
+
+    def is_one(self):
+        return self[0].is_one() and self[1].is_zero() and self[2].is_zero()
+
 
 class Fq12(tuple):
     def __new__(cls, c0, c1):
@@ -239,6 +257,12 @@ class Fq12(tuple):
     def __str__(self):
         return 'Fq12(' + str(self[0]) + ' + ' + str(self[1]) + ' * w)'
 
+    def is_zero(self):
+        return self[0].is_zero() and self[1].is_zero()
+
+    def is_one(self):
+        return self[0].is_one() and self[1].is_zero()
+
 
 
 
@@ -252,4 +276,4 @@ if __name__ == '__main__':
 
     f = Fq12(d, e)
     print(d)
-    print(d/d)
+    print((d/d).is_one())
