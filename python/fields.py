@@ -32,6 +32,17 @@ class Fq(int):
     def __truediv__(self, other):
         return Fq(self.inverse() * other, self.q)
 
+    def __pow__(self, power):
+        # Basic square and multiply algorithm
+        power = bin(int(power))
+        power = power[3:] # Removes '0b1' from number
+        ret = self
+        for i in power:
+            ret *= ret
+            if i:
+                ret *= self
+        return ret
+
     def inverse(self):
         t = 0
         new_t = 1
@@ -44,14 +55,25 @@ class Fq(int):
             r, new_r = new_r, r - q * new_r
         return Fq(t, self.q)
 
-    def square(self):
-        return self * self
+    def sqrt(self):
+        # Todo: Catch non-existent sqrt
+        # Simplified Tonelli-Shanks for q==3 mod 4
+        assert self.q % 4 == 3
+        return self**((self.q + 1)/4)
 
     def is_zero(self):
         return self == 0
 
     def is_one(self):
         return self == 1
+
+    @classmethod
+    def zero(cls, q):
+        return cls(0, q)
+
+    @classmethod
+    def one(cls, q):
+        return cls(0, q)
 
 
 class Fq2(tuple):
@@ -89,6 +111,17 @@ class Fq2(tuple):
     def __truediv__(self, other):
         return self * other.inverse()
 
+    def __pow__(self, power):
+        # Basic square and multiply algorithm
+        power = bin(int(power))
+        power = power[3:] # Removes '0b1' from number
+        ret = self
+        for i in power:
+            ret *= ret
+            if i:
+                ret *= self
+        return ret
+
     def __str__(self):
         return 'Fq2(' + str(self[0]) + ' + ' + str(self[1]) + ' * u)'
 
@@ -110,6 +143,14 @@ class Fq2(tuple):
 
     def is_one(self):
         return self[0].is_one() and self[1].is_zero()
+
+    @classmethod
+    def zero(cls, q):
+        return cls(Fq.zero(q), Fq.zero(q))
+
+    @classmethod
+    def one(cls, q):
+        return cls(Fq.one(q), Fq.zero(q))
 
 
 class Fq6(tuple):
@@ -304,6 +345,7 @@ class Fq12(tuple):
 
 
 if __name__ == '__main__':
+    # Todo: Replace with proper test cases.
     a = Fq2(Fq(3, 17), Fq(4, 17))
     b = Fq2(Fq(5, 17), Fq(11, 17))
     c = Fq2(Fq(8, 17), Fq(14, 17))
@@ -312,5 +354,11 @@ if __name__ == '__main__':
     e = Fq6(c, b, a)
 
     f = Fq12(d, e)
-    print(f)
+
+    # Check inversion in Fq12
     print((f/f).is_one())
+
+    # Check sqrt in Fq (q % 4 == 3)
+    z = Fq(3, 11)
+    print(z.sqrt()*z.sqrt() == z)
+
