@@ -75,6 +75,9 @@ class g1:
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __eq__(self, other):
+        return self.as_affine() == other.as_affine()
+
     def double(self):
         if self.is_infinity():
             # Doubling infinity is trivial
@@ -130,8 +133,8 @@ class g1:
 
 
 if __name__ == '__main__':
-    A = g1.get_point_from_x(Fq(4, 19), True)
-    B = g1.get_point_from_x(Fq(6, 19), True)
+    A = g1.get_point_from_x(Fq2(Fq(4, 19), Fq(6, 19)), True)
+    B = g1.get_point_from_x(Fq2(Fq(7, 19), Fq(11, 19)), True)
 
     print((A-A).is_infinity())
-    print((B * 7).as_affine() == (B+B+B+B+B+B+B).as_affine())
+    print((B * 7) == (B+B+B+B+B+B+B))

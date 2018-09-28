@@ -37,7 +37,7 @@ class Fq(int):
         # Todo: Make constant time(ish)
         # Definatly not constant time crypto!
         power = bin(int(power))
-        power = power[3:] # Removes '0b1' from number
+        power = power[3:]  # Removes '0b1' from number
         ret = self
         for i in power:
             ret = ret.square()
@@ -88,7 +88,9 @@ class Fq2(tuple):
         return super().__new__(cls, (c0, c1))
 
     def __add__(self, other):
-        return Fq2(self.c0 + other.c0, self.c1 + other.c1)
+        if isinstance(other, Fq2):
+            return Fq2(self.c0 + other.c0, self.c1 + other.c1)
+        return Fq2(self.c0 + other, self.c1)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -103,6 +105,8 @@ class Fq2(tuple):
         return Fq2(other.c0 - self.c0, other.c1 - self.c1)
 
     def __mul__(self, other):
+        if isinstance(other, int):
+            other = Fq2(Fq(other, self.q), self.c1.zero())
         aa = self.c0 * other.c0
         bb = self.c1 * other.c1
         o = other.c0 + other.c1
@@ -112,6 +116,9 @@ class Fq2(tuple):
         c1 -= bb
         c0 = aa - bb
         return Fq2(c0, c1)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
