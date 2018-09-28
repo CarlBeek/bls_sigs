@@ -76,9 +76,7 @@ class Fq(int):
 
 class Fq2(tuple):
     def __new__(cls, c0: Fq, c1: Fq):
-        ret = super().__new__(cls, (c0, c1))
-        ret.q = c0.q
-        return ret
+        return super().__new__(cls, (c0, c1))
 
     def __add__(self, other):
         return Fq2(self[0] + other[0], self[1] + other[1])
@@ -145,12 +143,14 @@ class Fq2(tuple):
     def one(self):
         return Fq2(self[0].one(), self[1].zero())
 
+    @property
+    def q(self):
+        return self[0].q
+
 
 class Fq6(tuple):
     def __new__(cls, c0, c1, c2):
-        ret = super().__new__(cls, (c0, c1, c2))
-        ret.q = c0.q
-        return ret
+        return super().__new__(cls, (c0, c1, c2))
 
     def __neg__(self):
         c0 = -self[0]
@@ -266,12 +266,14 @@ class Fq6(tuple):
         c0 = c0.mul_by_nonresidue()
         return Fq6(c0, c1, c2)
 
+    @property
+    def q(self):
+        return self[0].q
+
 
 class Fq12(tuple):
     def __new__(cls, c0, c1):
-        ret = super().__new__(cls, (c0, c1))
-        ret.q = c0.q
-        return ret
+        return super().__new__(cls, (c0, c1))
 
     def __neg__(self):
         c0 = -self[0]
@@ -330,6 +332,10 @@ class Fq12(tuple):
 
     def is_one(self):
         return self[0].is_one() and self[1].is_zero()
+
+    @property
+    def q(self):
+        return self[0].q
 
 
 
