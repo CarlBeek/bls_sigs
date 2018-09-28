@@ -67,13 +67,11 @@ class Fq(int):
     def is_one(self):
         return self == 1
 
-    @classmethod
-    def zero(cls, q):
-        return cls(0, q)
+    def zero(self):
+        return Fq(0, self.q)
 
-    @classmethod
-    def one(cls, q):
-        return cls(0, q)
+    def one(self):
+        return Fq(1, self.q)
 
 
 class Fq2(tuple):
@@ -144,13 +142,11 @@ class Fq2(tuple):
     def is_one(self):
         return self[0].is_one() and self[1].is_zero()
 
-    @classmethod
-    def zero(cls, q):
-        return cls(Fq.zero(q), Fq.zero(q))
+    def zero(self):
+        return Fq2(self[0].zero(), self[1].zero())
 
-    @classmethod
-    def one(cls, q):
-        return cls(Fq.one(q), Fq.zero(q))
+    def one(self):
+        return Fq2(self[0].one(), self[1].zero())
 
 
 class Fq6(tuple):
@@ -361,4 +357,3 @@ if __name__ == '__main__':
     # Check sqrt in Fq (q % 4 == 3)
     z = Fq(3, 11)
     print(z.sqrt()*z.sqrt() == z)
-
