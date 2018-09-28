@@ -84,7 +84,7 @@ class Fq2(tuple):
         return super().__new__(cls, (c0, c1))
 
     def __add__(self, other):
-        return Fq2(self.c0 + other[0], self.c1 + other[1])
+        return Fq2(self.c0 + other.c0, self.c1 + other.c1)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -93,15 +93,15 @@ class Fq2(tuple):
         return Fq2(self.c0.__neg__(), self.c1.__neg__())
 
     def __sub__(self, other):
-        return Fq2(self.c0-other[0], self.c1 - other[1])
+        return Fq2(self.c0-other.c0, self.c1 - other.c1)
 
     def __rsub__(self, other):
-        return Fq2(other[0] - self.c0, other[1] - self.c1)
+        return Fq2(other.c0 - self.c0, other.c1 - self.c1)
 
     def __mul__(self, other):
-        aa = self.c0 * other[0]
-        bb = self.c1 * other[1]
-        o = other[0] + other[1]
+        aa = self.c0 * other.c0
+        bb = self.c1 * other.c1
+        o = other.c0 + other.c1
         c1 = self.c1 + self.c0
         c1 *= o
         c1 -= aa
@@ -177,24 +177,24 @@ class Fq6(tuple):
         return Fq6(c0, c1, c2)
 
     def __add__(self, other):
-        c0 = self.c0 + other[0]
-        c1 = self.c1 + other[1]
-        c2 = self.c2 + other[2]
+        c0 = self.c0 + other.c0
+        c1 = self.c1 + other.c1
+        c2 = self.c2 + other.c2
         return Fq6(c0, c1, c2)
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __sub__(self, other):
-        c0 = self.c0 - other[0]
-        c1 = self.c1 - other[1]
-        c2 = self.c2 - other[2]
+        c0 = self.c0 - other.c0
+        c1 = self.c1 - other.c1
+        c2 = self.c2 - other.c2
         return Fq6(c0, c1, c2)
 
     def __rsub__(self, other):
-        c0 = other[0] - self.c0
-        c1 = other[1] - self.c1
-        c2 = other[2] - self.c2
+        c0 = other.c0 - self.c0
+        c1 = other.c1 - self.c1
+        c2 = other.c2 - self.c2
         return Fq6(c0, c1, c2)
 
     def __mul__(self, other):
@@ -202,13 +202,13 @@ class Fq6(tuple):
         bb = self.c1
         cc = self.c2
 
-        aa *= other[0]
-        bb *= other[1]
-        cc *= other[2]
+        aa *= other.c0
+        bb *= other.c1
+        cc *= other.c2
 
         # t1
-        t1 = other[1]
-        t1 += other[2]
+        t1 = other.c1
+        t1 += other.c2
         tmp = self.c1 + self.c2
         t1 *= tmp
         t1 -= bb
@@ -217,8 +217,8 @@ class Fq6(tuple):
         t1 += aa
 
         # t3
-        t3 = other[0]
-        t3 += other[2]
+        t3 = other.c0
+        t3 += other.c2
         tmp = self.c0 + self.c2
         t3 *= tmp
         t3 -= aa
@@ -226,8 +226,8 @@ class Fq6(tuple):
         t3 -= cc
 
         # t2
-        t2 = other[0]
-        t2 += other[1]
+        t2 = other.c0
+        t2 += other.c1
         tmp = self.c0 + self.c1
         t2 *= tmp
         t2 -= aa
@@ -311,8 +311,8 @@ class Fq12(tuple):
         return Fq12(c0, c1)
 
     def __add__(self, other):
-        c0 = self.c0 + other[0]
-        c1 = self.c1 + other[1]
+        c0 = self.c0 + other.c0
+        c1 = self.c1 + other.c1
         return Fq12(c0, c1)
 
     def __radd__(self, other):
@@ -325,9 +325,9 @@ class Fq12(tuple):
         return other + -self
 
     def __mul__(self, other):
-        aa = self.c0 * other[0]
-        bb = self.c1 * other[1]
-        o = other[0] + other[1]
+        aa = self.c0 * other.c0
+        bb = self.c1 * other.c1
+        o = other.c0 + other.c1
         c1 = self.c1 + self.c0
         c1 *= o
         c1 -= aa
