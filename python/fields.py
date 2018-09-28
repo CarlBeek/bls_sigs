@@ -29,8 +29,8 @@ class Fq(int):
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def __truediv__(self, other):
-        return Fq(self.inverse() * other, self.q)
+    def __rdiv__(self, other):
+        return Fq(other * self.inverse(), self.q)
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
@@ -105,9 +105,6 @@ class Fq2(tuple):
         c1 -= bb
         c0 = aa - bb
         return Fq2(c0, c1)
-
-    def __truediv__(self, other):
-        return self * other.inverse()
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
@@ -224,9 +221,6 @@ class Fq6(tuple):
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def __truediv__(self, other):
-        return self * other.inverse()
-
     def __str__(self):
         return 'Fq6(' + str(self[0]) + ' + ' + str(self[1]) + ' * v + ' + str(self[2]) + ' * v^2)'
 
@@ -313,8 +307,8 @@ class Fq12(tuple):
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def __truediv__(self, other):
-        return self * other.inverse()
+    def __rdiv__(self, other):
+        return other * self.inverse()
 
     def __str__(self):
         return 'Fq12(' + str(self[0]) + ' + ' + str(self[1]) + ' * w)'
@@ -352,7 +346,7 @@ if __name__ == '__main__':
     f = Fq12(d, e)
 
     # Check inversion in Fq12
-    print((f/f).is_one())
+    print((f*f.inverse()).is_one())
 
     # Check sqrt in Fq (q % 4 == 3)
     z = Fq(3, 11)
