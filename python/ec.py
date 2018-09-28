@@ -12,7 +12,6 @@ class g1:
             self.X = self.basefield.zero()
             self.Y = self.basefield.one()
 
-
     def __str__(self):
         if self.is_infinity():
             return 'Infinity'
@@ -24,20 +23,24 @@ class g1:
         return self
 
     def __add__(self, other):
+        '''
+        These check are included for the sake of completeness.
+        In reality, these cases will never be reached and thus could be commited
+        '''
         # Addition is trivial when one of the points is infinity:
         if self.is_infinity():
             return other
         elif other.is_infinity():
             return self
+        # If the point is being added to itself, just double instead
+        elif self == other:
+            return self.double()
 
         # http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
         Z1Z1 = self.Z.square()
         Z2Z2 = other.Z.square()
         U1 = self.X * Z2Z2
         U2 = other.X * Z1Z1
-
-        if U1 == U2:
-            return self.double()
         S1 = self.Y * other.Z * Z2Z2
         S2 = other.Y * self.Z * Z1Z1
         H = U2 - U1
@@ -49,6 +52,12 @@ class g1:
         Y3 = r * (V-X3) - (2 * S1 * J)
         Z3 = ((self.Z + other.Z).square() - Z1Z1 - Z2Z2) * H
         return g1(X3, Y3, Z3)
+
+    def __sub__(self, other):
+        return self + other.__neg__()
+
+    def __rsub__(self, other):
+        return other + self.__neg__()
 
     def __mul__(self, other=int):
         # Basic Double and Add alg:
@@ -108,7 +117,7 @@ class g1:
     @classmethod
     def from_affine(cls, x, y, infinity=False):
         if infinity:
-            cls(x, y, x.zero())
+            return cls(x, y, x.zero())
         return cls(x, y, x.one())
 
     @classmethod
@@ -121,10 +130,8 @@ class g1:
 
 
 if __name__ == '__main__':
-    A = g1.get_point_from_x(Fq(3, 19), True)
-    B = g1.get_point_from_x(Fq(4, 19), True)
+    A = g1.get_point_from_x(Fq(4, 19), True)
+    B = g1.get_point_from_x(Fq(6, 19), True)
 
-    C = g1.from_affine(Fq(16, 19), Fq(7, 19), True)
-    print(C)
-    print((B * 7).as_affine())
-    print((B+B+B+B+B+B+B).as_affine())
+    print((A-A).is_infinity())
+    print((B * 7).as_affine() == (B+B+B+B+B+B+B).as_affine())

@@ -58,10 +58,14 @@ class Fq(int):
         return Fq(t, self.q)
 
     def sqrt(self):
-        # Todo: Catch non-existent sqrt
         # Simplified Tonelli-Shanks for q==3 mod 4
+        # https://eprint.iacr.org/2012/685.pdf  Algorithm 2
         assert self.q % 4 == 3
-        return self**((self.q + 1)/4)
+        a1 = self**((self.q - 1)/4)
+        a0 = a1*a1*self
+        if a0 == Fq(-1, a0.q):
+            raise ArithmeticError('The square root does not exist.')
+        return a1*self
 
     def square(self):
         return self * self
