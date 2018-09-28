@@ -79,25 +79,25 @@ class Fq2(tuple):
         return super().__new__(cls, (c0, c1))
 
     def __add__(self, other):
-        return Fq2(self[0] + other[0], self[1] + other[1])
+        return Fq2(self.c0 + other[0], self.c1 + other[1])
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __neg__(self):
-        return Fq2(self[0].__neg__(), self[1].__neg__())
+        return Fq2(self.c0.__neg__(), self.c1.__neg__())
 
     def __sub__(self, other):
-        return Fq2(self[0]-other[0], self[1] - other[1])
+        return Fq2(self.c0-other[0], self.c1 - other[1])
 
     def __rsub__(self, other):
-        return Fq2(other[0] - self[0], other[1] - self[1])
+        return Fq2(other[0] - self.c0, other[1] - self.c1)
 
     def __mul__(self, other):
-        aa = self[0] * other[0]
-        bb = self[1] * other[1]
+        aa = self.c0 * other[0]
+        bb = self.c1 * other[1]
         o = other[0] + other[1]
-        c1 = self[1] + self[0]
+        c1 = self.c1 + self.c0
         c1 *= o
         c1 -= aa
         c1 -= bb
@@ -116,36 +116,44 @@ class Fq2(tuple):
         return ret
 
     def __str__(self):
-        return 'Fq2(' + str(self[0]) + ' + ' + str(self[1]) + ' * u)'
+        return 'Fq2(' + str(self.c0) + ' + ' + str(self.c1) + ' * u)'
 
     def mul_by_nonresidue(self):
-        return Fq2(self[0] - self[1], self[0] + self[1])
+        return Fq2(self.c0 - self.c1, self.c0 + self.c1)
 
     def inverse(self):
-        t1 = self[1] * self[1]
-        t0 = self[0] * self[0]
+        t1 = self.c1 * self.c1
+        t0 = self.c0 * self.c0
         t0 += t1
         t0 = t0.inverse()
-        a = self[0]*t0
-        b = self[1]*t0
+        a = self.c0*t0
+        b = self.c1*t0
         b = -b
         return Fq2(a, b)
 
     def is_zero(self):
-        return self[0].is_zero() and self[1].is_zero()
+        return self.c0.is_zero() and self.c1.is_zero()
 
     def is_one(self):
-        return self[0].is_one() and self[1].is_zero()
+        return self.c0.is_one() and self.c1.is_zero()
 
     def zero(self):
-        return Fq2(self[0].zero(), self[1].zero())
+        return Fq2(self.c0.zero(), self.c1.zero())
 
     def one(self):
-        return Fq2(self[0].one(), self[1].zero())
+        return Fq2(self.c0.one(), self.c1.zero())
 
     @property
     def q(self):
-        return self[0].q
+        return self.c0.q
+
+    @property
+    def c0(self):
+        return self[0]
+    
+    @property
+    def c1(self):
+        return self[1]
 
 
 class Fq6(tuple):
@@ -153,36 +161,36 @@ class Fq6(tuple):
         return super().__new__(cls, (c0, c1, c2))
 
     def __neg__(self):
-        c0 = -self[0]
-        c1 = -self[1]
-        c2 = -self[2]
+        c0 = -self.c0
+        c1 = -self.c1
+        c2 = -self.c2
         return Fq6(c0, c1, c2)
 
     def __add__(self, other):
-        c0 = self[0] + other[0]
-        c1 = self[1] + other[1]
-        c2 = self[2] + other[2]
+        c0 = self.c0 + other[0]
+        c1 = self.c1 + other[1]
+        c2 = self.c2 + other[2]
         return Fq6(c0, c1, c2)
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __sub__(self, other):
-        c0 = self[0] - other[0]
-        c1 = self[1] - other[1]
-        c2 = self[2] - other[2]
+        c0 = self.c0 - other[0]
+        c1 = self.c1 - other[1]
+        c2 = self.c2 - other[2]
         return Fq6(c0, c1, c2)
 
     def __rsub__(self, other):
-        c0 = other[0] - self[0]
-        c1 = other[1] - self[1]
-        c2 = other[2] - self[2]
+        c0 = other[0] - self.c0
+        c1 = other[1] - self.c1
+        c2 = other[2] - self.c2
         return Fq6(c0, c1, c2)
 
     def __mul__(self, other):
-        aa = self[0]
-        bb = self[1]
-        cc = self[2]
+        aa = self.c0
+        bb = self.c1
+        cc = self.c2
 
         aa *= other[0]
         bb *= other[1]
@@ -191,7 +199,7 @@ class Fq6(tuple):
         # t1
         t1 = other[1]
         t1 += other[2]
-        tmp = self[1] + self[2]
+        tmp = self.c1 + self.c2
         t1 *= tmp
         t1 -= bb
         t1 -= cc
@@ -201,7 +209,7 @@ class Fq6(tuple):
         # t3
         t3 = other[0]
         t3 += other[2]
-        tmp = self[0] + self[2]
+        tmp = self.c0 + self.c2
         t3 *= tmp
         t3 -= aa
         t3 += bb
@@ -210,7 +218,7 @@ class Fq6(tuple):
         # t2
         t2 = other[0]
         t2 += other[1]
-        tmp = self[0] + self[1]
+        tmp = self.c0 + self.c1
         t2 *= tmp
         t2 -= aa
         t2 -= bb
@@ -222,29 +230,29 @@ class Fq6(tuple):
         return self.__mul__(other)
 
     def __str__(self):
-        return 'Fq6(' + str(self[0]) + ' + ' + str(self[1]) + ' * v + ' + str(self[2]) + ' * v^2)'
+        return 'Fq6(' + str(self.c0) + ' + ' + str(self.c1) + ' * v + ' + str(self.c2) + ' * v^2)'
 
     def inverse(self):
-        c0 = self[2]
+        c0 = self.c2
         c0 = c0.mul_by_nonresidue()
-        c0 *= self[1]
+        c0 *= self.c1
         c0 = -c0
-        c0 += self[0]*self[0]
+        c0 += self.c0*self.c0
 
-        c1 = self[2]
+        c1 = self.c2
         c1 *= c1
         c1 = c1.mul_by_nonresidue()
-        c1 -= self[0]*self[1]
+        c1 -= self.c0*self.c1
 
-        c2 = self[1]
+        c2 = self.c1
         c2 = c2*c2
-        c2 -= self[0]*self[2]
+        c2 -= self.c0*self.c2
 
-        tmp1 = self[2]*c1
-        tmp2 = self[1]*c2
+        tmp1 = self.c2*c1
+        tmp2 = self.c1*c2
         tmp1 += tmp2
         tmp1 = tmp1.mul_by_nonresidue()
-        tmp2 = self[0]*c0
+        tmp2 = self.c0*c0
         tmp1 += tmp2
 
         tmp1 = tmp1.inverse()
@@ -254,21 +262,33 @@ class Fq6(tuple):
         return Fq6(c0, c1, c2)
 
     def is_zero(self):
-        return self[0].is_zero() and self[1].is_zero() and self[2].is_zero()
+        return self.c0.is_zero() and self.c1.is_zero() and self.c2.is_zero()
 
     def is_one(self):
-        return self[0].is_one() and self[1].is_zero() and self[2].is_zero()
+        return self.c0.is_one() and self.c1.is_zero() and self.c2.is_zero()
 
     def mul_by_nonresidue(self):
-        c0 = self[2]
-        c1 = self[0]
-        c2 = self[1]
+        c0 = self.c2
+        c1 = self.c0
+        c2 = self.c1
         c0 = c0.mul_by_nonresidue()
         return Fq6(c0, c1, c2)
 
     @property
     def q(self):
         return self[0].q
+    
+    @property
+    def c0(self):
+        return self[0]
+
+    @property
+    def c1(self):
+        return self[1]
+
+    @property
+    def c2(self):
+        return self[2]
 
 
 class Fq12(tuple):
@@ -276,13 +296,13 @@ class Fq12(tuple):
         return super().__new__(cls, (c0, c1))
 
     def __neg__(self):
-        c0 = -self[0]
-        c1 = -self[1]
+        c0 = -self.c0
+        c1 = -self.c1
         return Fq12(c0, c1)
 
     def __add__(self, other):
-        c0 = self[0] + other[0]
-        c1 = self[1] + other[1]
+        c0 = self.c0 + other[0]
+        c1 = self.c1 + other[1]
         return Fq12(c0, c1)
 
     def __radd__(self, other):
@@ -295,10 +315,10 @@ class Fq12(tuple):
         return other + -self
 
     def __mul__(self, other):
-        aa = self[0] * other[0]
-        bb = self[1] * other[1]
+        aa = self.c0 * other[0]
+        bb = self.c1 * other[1]
         o = other[0] + other[1]
-        c1 = self[1] + self[0]
+        c1 = self.c1 + self.c0
         c1 *= o
         c1 -= aa
         c1 -= bb
@@ -313,31 +333,37 @@ class Fq12(tuple):
         return other * self.inverse()
 
     def __str__(self):
-        return 'Fq12(' + str(self[0]) + ' + ' + str(self[1]) + ' * w)'
+        return 'Fq12(' + str(self.c0) + ' + ' + str(self.c1) + ' * w)'
 
     def inverse(self):
-        c0 = self[0] * self[0]
-        c1 = self[1] * self[1]
+        c0 = self.c0 * self.c0
+        c1 = self.c1 * self.c1
         c1 = c1.mul_by_nonresidue()
         c0 -= c1
 
         t = c0.inverse()
-        t0 = t * self[0]
-        t1 = t * self[1]
+        t0 = t * self.c0
+        t1 = t * self.c1
         t1 = -t1
         return Fq12(t0, t1)
 
     def is_zero(self):
-        return self[0].is_zero() and self[1].is_zero()
+        return self.c0.is_zero() and self.c1.is_zero()
 
     def is_one(self):
-        return self[0].is_one() and self[1].is_zero()
+        return self.c0.is_one() and self.c1.is_zero()
 
     @property
     def q(self):
         return self[0].q
 
+    @property
+    def c0(self):
+        return self[0]
 
+    @property
+    def c1(self):
+        return self[1]
 
 
 if __name__ == '__main__':
