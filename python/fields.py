@@ -61,8 +61,8 @@ class Fq(int):
         # Simplified Tonelli-Shanks for q==3 mod 4
         # https://eprint.iacr.org/2012/685.pdf  Algorithm 2
         assert self.q % 4 == 3
-        a1 = self**((self.q - 1)/4)
-        a0 = a1*a1*self
+        a1 = self ** ((self.q - 3)/4)
+        a0 = a1.square() * self
         if a0 == Fq(-1, a0.q):
             raise ArithmeticError('The square root does not exist.')
         return a1*self
@@ -118,7 +118,7 @@ class Fq2(tuple):
         # Todo: Make constant time(ish)
         # Definatly not constant time crypto!
         power = bin(int(power))
-        power = power[3:] # Removes '0b1' from number
+        power = power[3:]  # Removes '0b1' from number
         ret = self
         for i in power:
             ret = ret.square()
@@ -144,6 +144,23 @@ class Fq2(tuple):
 
     def square(self):
         return self * self
+
+    def sqrt(self):
+        # Modified Tonelli-Shanks for q==3 mod 4
+        # https://eprint.iacr.org/2012/685.pdf  Algorithm 9
+        assert self.q # q%4 == 3 This can ultimately be removed for BLS12-381
+        a1 = self ** ((self.q - 3) / 4)
+        alpha = a1.square() * self
+        a0 = alpha**(self.q+1)
+
+        if a0 == -self.one():
+            raise ArithmeticError('The square root does not exist.')
+        x0 = a1 * self
+        if alpha == -self.one():
+            # return i*x0 (i=sqrt(-1))
+            return Fq2(Fq(0, self.q), Fq(-1, self.q).sqrt())*x0
+        b = (self.one() + alpha)**((self.q - 1)/2)
+        return b * x0
 
     def is_zero(self):
         return self.c0.is_zero() and self.c1.is_zero()
@@ -382,9 +399,9 @@ class Fq12(tuple):
 
 if __name__ == '__main__':
     # Todo: Replace with proper test cases.
-    a = Fq2(Fq(3, 17), Fq(4, 17))
-    b = Fq2(Fq(5, 17), Fq(11, 17))
-    c = Fq2(Fq(8, 17), Fq(14, 17))
+    a = Fq2(Fq(3, 11), Fq(4, 11))
+    b = Fq2(Fq(7, 11), Fq(8, 11))
+    c = Fq2(Fq(8, 11), Fq(14, 11))
 
     d = Fq6(a, b, c)
     e = Fq6(c, b, a)
@@ -397,3 +414,5 @@ if __name__ == '__main__':
     # Check sqrt in Fq (q % 4 == 3)
     z = Fq(3, 11)
     print(z.sqrt()*z.sqrt() == z)
+    print(a.sqrt().square() == a)
+    print(b.square().sqrt() == b)
