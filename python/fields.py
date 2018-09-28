@@ -29,8 +29,8 @@ class Fq(int):
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def __truediv__(self, other):
-        return Fq(self.inverse() * other, self.q)
+    def __rdiv__(self, other):
+        return Fq(other * self.inverse(), self.q)
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
@@ -76,9 +76,7 @@ class Fq(int):
 
 class Fq2(tuple):
     def __new__(cls, c0: Fq, c1: Fq):
-        ret = super().__new__(cls, (c0, c1))
-        ret.q = c0.q
-        return ret
+        return super().__new__(cls, (c0, c1))
 
     def __add__(self, other):
         return Fq2(self[0] + other[0], self[1] + other[1])
@@ -105,9 +103,6 @@ class Fq2(tuple):
         c1 -= bb
         c0 = aa - bb
         return Fq2(c0, c1)
-
-    def __truediv__(self, other):
-        return self * other.inverse()
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
@@ -148,12 +143,14 @@ class Fq2(tuple):
     def one(self):
         return Fq2(self[0].one(), self[1].zero())
 
+    @property
+    def q(self):
+        return self[0].q
+
 
 class Fq6(tuple):
     def __new__(cls, c0, c1, c2):
-        ret = super().__new__(cls, (c0, c1, c2))
-        ret.q = c0.q
-        return ret
+        return super().__new__(cls, (c0, c1, c2))
 
     def __neg__(self):
         c0 = -self[0]
@@ -224,9 +221,6 @@ class Fq6(tuple):
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def __truediv__(self, other):
-        return self * other.inverse()
-
     def __str__(self):
         return 'Fq6(' + str(self[0]) + ' + ' + str(self[1]) + ' * v + ' + str(self[2]) + ' * v^2)'
 
@@ -272,12 +266,14 @@ class Fq6(tuple):
         c0 = c0.mul_by_nonresidue()
         return Fq6(c0, c1, c2)
 
+    @property
+    def q(self):
+        return self[0].q
+
 
 class Fq12(tuple):
     def __new__(cls, c0, c1):
-        ret = super().__new__(cls, (c0, c1))
-        ret.q = c0.q
-        return ret
+        return super().__new__(cls, (c0, c1))
 
     def __neg__(self):
         c0 = -self[0]
@@ -313,8 +309,8 @@ class Fq12(tuple):
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def __truediv__(self, other):
-        return self * other.inverse()
+    def __rdiv__(self, other):
+        return other * self.inverse()
 
     def __str__(self):
         return 'Fq12(' + str(self[0]) + ' + ' + str(self[1]) + ' * w)'
@@ -337,6 +333,10 @@ class Fq12(tuple):
     def is_one(self):
         return self[0].is_one() and self[1].is_zero()
 
+    @property
+    def q(self):
+        return self[0].q
+
 
 
 
@@ -352,7 +352,7 @@ if __name__ == '__main__':
     f = Fq12(d, e)
 
     # Check inversion in Fq12
-    print((f/f).is_one())
+    print((f*f.inverse()).is_one())
 
     # Check sqrt in Fq (q % 4 == 3)
     z = Fq(3, 11)
