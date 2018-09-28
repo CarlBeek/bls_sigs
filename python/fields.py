@@ -34,12 +34,14 @@ class Fq(int):
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
+        # Todo: Make constant time(ish)
+        # Definatly not constant time crypto!
         power = bin(int(power))
         power = power[3:] # Removes '0b1' from number
         ret = self
         for i in power:
-            ret *= ret
-            if i:
+            ret = ret.square()
+            if i == '1':
                 ret *= self
         return ret
 
@@ -60,6 +62,9 @@ class Fq(int):
         # Simplified Tonelli-Shanks for q==3 mod 4
         assert self.q % 4 == 3
         return self**((self.q + 1)/4)
+
+    def square(self):
+        return self * self
 
     def is_zero(self):
         return self == 0
@@ -106,12 +111,14 @@ class Fq2(tuple):
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
+        # Todo: Make constant time(ish)
+        # Definatly not constant time crypto!
         power = bin(int(power))
         power = power[3:] # Removes '0b1' from number
         ret = self
         for i in power:
-            ret *= ret
-            if i:
+            ret = ret.square()
+            if i == '1':
                 ret *= self
         return ret
 
@@ -130,6 +137,9 @@ class Fq2(tuple):
         b = self.c1*t0
         b = -b
         return Fq2(a, b)
+
+    def square(self):
+        return self * self
 
     def is_zero(self):
         return self.c0.is_zero() and self.c1.is_zero()
