@@ -76,11 +76,13 @@ class Fq(int):
     def is_one(self):
         return self == 1
 
-    def zero(self):
-        return Fq(0, self.q)
+    @classmethod
+    def zero(cls, q):
+        return cls(0, q)
 
-    def one(self):
-        return Fq(1, self.q)
+    @classmethod
+    def one(cls, q):
+        return cls(1, q)
 
 
 class Fq2(tuple):
@@ -160,13 +162,13 @@ class Fq2(tuple):
         alpha = a1.square() * self
         a0 = alpha**(self.q+1)
 
-        if a0 == -self.one():
+        if a0 == -Fq2.one(self.q):
             raise ArithmeticError('The square root does not exist.')
         x0 = a1 * self
-        if alpha == -self.one():
-            # return i*x0 (i=sqrt(-1))
+        if alpha == -Fq2.one(self.q):
+            # This returns i*x0 (i=sqrt(-1))
             return Fq2(Fq(0, self.q), Fq(-1, self.q).sqrt())*x0
-        b = (self.one() + alpha)**((self.q - 1)/2)
+        b = (Fq2.one(self.q) + alpha)**((self.q - 1)/2)
         return b * x0
 
     def is_zero(self):
@@ -175,11 +177,13 @@ class Fq2(tuple):
     def is_one(self):
         return self.c0.is_one() and self.c1.is_zero()
 
-    def zero(self):
-        return Fq2(self.c0.zero(), self.c1.zero())
+    @classmethod
+    def zero(cls, q):
+        return cls(Fq.zero(q), Fq.zero(q))
 
-    def one(self):
-        return Fq2(self.c0.one(), self.c1.zero())
+    @classmethod
+    def one(cls, q):
+        return cls(Fq.one(q), Fq.zero(q))
 
     @property
     def q(self):
@@ -299,18 +303,26 @@ class Fq6(tuple):
         c2 *= tmp1
         return Fq6(c0, c1, c2)
 
-    def is_zero(self):
-        return self.c0.is_zero() and self.c1.is_zero() and self.c2.is_zero()
-
-    def is_one(self):
-        return self.c0.is_one() and self.c1.is_zero() and self.c2.is_zero()
-
     def mul_by_nonresidue(self):
         c0 = self.c2
         c1 = self.c0
         c2 = self.c1
         c0 = c0.mul_by_nonresidue()
         return Fq6(c0, c1, c2)
+
+    def is_zero(self):
+        return self.c0.is_zero() and self.c1.is_zero() and self.c2.is_zero()
+
+    def is_one(self):
+        return self.c0.is_one() and self.c1.is_zero() and self.c2.is_zero()
+
+    @classmethod
+    def zero(cls, q):
+        return cls(Fq2.zero(q), Fq2.zero(q), Fq2.zero(q))
+
+    @classmethod
+    def one(cls, q):
+        return cls(Fq2.one(q), Fq2.zero(q), Fq2.zero(q))
 
     @property
     def q(self):
@@ -390,6 +402,14 @@ class Fq12(tuple):
 
     def is_one(self):
         return self.c0.is_one() and self.c1.is_zero()
+
+    @classmethod
+    def zero(cls, q):
+        return cls(Fq6.zero(q), Fq6.zero(q))
+
+    @classmethod
+    def one(cls, q):
+        return cls(Fq6.one(q), Fq6.zero(q))
 
     @property
     def q(self):

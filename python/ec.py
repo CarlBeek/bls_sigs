@@ -2,15 +2,15 @@ import params
 from fields import Fq, Fq2
 
 
-class g1:
+class EC:
     def __init__(self, X, Y, Z):
         self.X = X
         self.Y = Y
         self.Z = Z
 
         if self.is_infinity():
-            self.X = self.basefield.zero()
-            self.Y = self.basefield.one()
+            self.X = self.basefield_zero()
+            self.Y = self.basefield_one()
 
     def __str__(self):
         if self.is_infinity():
@@ -19,7 +19,7 @@ class g1:
 
     def __neg__(self):
         if not self.is_infinity():
-            return g1(self.X, - self.Y, self.Z)
+            return EC(self.X, - self.Y, self.Z)
         return self
 
     def __add__(self, other):
@@ -51,7 +51,7 @@ class g1:
         X3 = r.square() - J - (2 * V)
         Y3 = r * (V-X3) - (2 * S1 * J)
         Z3 = ((self.Z + other.Z).square() - Z1Z1 - Z2Z2) * H
-        return g1(X3, Y3, Z3)
+        return EC(X3, Y3, Z3)
 
     def __sub__(self, other):
         return self + other.__neg__()
@@ -92,7 +92,7 @@ class g1:
         X3 = F - 2 * D
         Y3 = E * (D - X3) - 8 * C
         Z3 = 2 * self.Y * self.Z
-        return g1(X3, Y3, Z3)
+        return EC(X3, Y3, Z3)
 
     def is_infinity(self):
         return self.Z.is_zero()
@@ -114,8 +114,12 @@ class g1:
         return self.Y * (self.Z**3).inverse()
 
     @property
-    def basefield(self):
-        return self.X.zero()
+    def basefield_zero(self):
+        return self.X.zero(self.X.q)
+
+    @property
+    def basefield_one(self):
+        return self.X.one(self.X.q)
 
     @classmethod
     def from_affine(cls, x, y, infinity=False):
@@ -133,8 +137,8 @@ class g1:
 
 
 if __name__ == '__main__':
-    A = g1.get_point_from_x(Fq2(Fq(4, 19), Fq(6, 19)), True)
-    B = g1.get_point_from_x(Fq2(Fq(7, 19), Fq(11, 19)), True)
+    A = EC.get_point_from_x(Fq2(Fq(4, 19), Fq(6, 19)), True)
+    B = EC.get_point_from_x(Fq2(Fq(7, 19), Fq(11, 19)), True)
 
     print((A-A).is_infinity())
     print((B * 7) == (B+B+B+B+B+B+B))
