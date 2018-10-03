@@ -2,15 +2,15 @@ import params
 from fields import Fq, Fq2
 
 
-class EC:
+class EC(object):
     def __init__(self, X, Y, Z):
         self.X = X
         self.Y = Y
         self.Z = Z
 
         if self.is_infinity():
-            self.X = self.basefield_zero()
-            self.Y = self.basefield_one()
+            self.X = self.basefield_zero
+            self.Y = self.basefield_one
 
     def __str__(self):
         if self.is_infinity():
@@ -25,7 +25,7 @@ class EC:
     def __add__(self, other):
         '''
         These check are included for the sake of completeness.
-        In reality, these cases will never be reached and thus could be commited
+        In reality, these cases will never be reached and thus could be ommited
         '''
         # Addition is trivial when one of the points is infinity:
         if self.is_infinity():
@@ -124,8 +124,8 @@ class EC:
     @classmethod
     def from_affine(cls, x, y, infinity=False):
         if infinity:
-            return cls(x, y, x.zero())
-        return cls(x, y, x.one())
+            return cls(x, y, x.zero(x.q))
+        return cls(x, y, x.one(x.q))
 
     @classmethod
     def get_point_from_x(cls, X, greatest=False):
@@ -133,7 +133,7 @@ class EC:
         Y = X3b.sqrt()
         if greatest and Y < - Y:
             Y = - Y
-        return cls(X, Y, X.one())
+        return cls(X, Y, X.one(X.q))
 
 
 if __name__ == '__main__':

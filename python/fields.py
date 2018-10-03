@@ -29,6 +29,10 @@ class Fq(int):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __truediv__(self, other):
+        other = Fq.to_cls(other, self.q)
+        return Fq(self * other.inverse(), self.q)
+
     def __rdiv__(self, other):
         return Fq(other * self.inverse(), self.q)
 
@@ -84,31 +88,39 @@ class Fq(int):
     def one(cls, q):
         return cls(1, q)
 
+    @classmethod
+    def to_cls(cls, obj, q):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, int):
+            return Fq(obj, q)
+        raise NotImplementedError
+
 
 class Fq2(tuple):
     def __new__(cls, c0: Fq, c1: Fq):
         return super().__new__(cls, (c0, c1))
 
     def __add__(self, other):
-        if isinstance(other, Fq2):
-            return Fq2(self.c0 + other.c0, self.c1 + other.c1)
-        return Fq2(self.c0 + other, self.c1)
+        other = self.to_cls(other, self.q)
+        return Fq2(self.c0 + other.c0, self.c1 + other.c1)
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __neg__(self):
-        return Fq2(self.c0.__neg__(), self.c1.__neg__())
+        return Fq2(-self.c0, -self.c1)
 
     def __sub__(self, other):
-        return Fq2(self.c0-other.c0, self.c1 - other.c1)
+        other = self.to_cls(other, self.q)
+        return self + - other
 
     def __rsub__(self, other):
-        return Fq2(other.c0 - self.c0, other.c1 - self.c1)
+        other = self.to_cls(other, self.q)
+        return other + - self
 
     def __mul__(self, other):
-        if isinstance(other, int):
-            other = Fq2(Fq(other, self.q), self.c1.zero())
+        other = self.to_cls(other, self.q)
         aa = self.c0 * other.c0
         bb = self.c1 * other.c1
         o = other.c0 + other.c1
@@ -121,6 +133,14 @@ class Fq2(tuple):
 
     def __rmul__(self, other):
         return self.__mul__(other)
+
+    def __truediv__(self, other):
+        other = self.to_cls(other, self.q)
+        return self * other.inverse()
+
+    def __rdiv__(self, other):
+        other = self.to_cls(other, self.q)
+        return other * self.inverse()
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
@@ -183,7 +203,17 @@ class Fq2(tuple):
 
     @classmethod
     def one(cls, q):
-        return cls(Fq.one(q), Fq.zero(q))
+        return cls.to_cls(Fq.one(q), q)
+
+    @classmethod
+    def to_cls(cls, obj, q):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (int, Fq)):
+            return Fq2(Fq.to_cls(obj, q), Fq.zero(q))
+        print(obj)
+        print(type(obj))
+        raise NotImplementedError
 
     @property
     def q(self):
@@ -203,36 +233,27 @@ class Fq6(tuple):
         return super().__new__(cls, (c0, c1, c2))
 
     def __neg__(self):
-        c0 = -self.c0
-        c1 = -self.c1
-        c2 = -self.c2
-        return Fq6(c0, c1, c2)
+        c = (-c_self for c_self in self)
+        return Fq6(*c)
 
     def __add__(self, other):
-        c0 = self.c0 + other.c0
-        c1 = self.c1 + other.c1
-        c2 = self.c2 + other.c2
-        return Fq6(c0, c1, c2)
+        other = self.to_cls(other, self.q)
+        c = (c_self + c_other for c_self, c_other in zip(self, other))
+        return Fq6(*c)
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __sub__(self, other):
-        c0 = self.c0 - other.c0
-        c1 = self.c1 - other.c1
-        c2 = self.c2 - other.c2
-        return Fq6(c0, c1, c2)
+        other = self.to_cls(other, self.q)
+        return self + - other
 
     def __rsub__(self, other):
-        c0 = other.c0 - self.c0
-        c1 = other.c1 - self.c1
-        c2 = other.c2 - self.c2
-        return Fq6(c0, c1, c2)
+        return other + - self
 
     def __mul__(self, other):
-        aa = self.c0
-        bb = self.c1
-        cc = self.c2
+        other = self.to_cls(other, self.q)
+        aa, bb, cc = self
 
         aa *= other.c0
         bb *= other.c1
@@ -271,6 +292,26 @@ class Fq6(tuple):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __truediv__(self, other):
+        other = self.to_cls(other, self.q)
+        return self * other.inverse()
+
+    def __rdiv__(self, other):
+        return other * self.inverse()
+
+    def __pow__(self, power):
+        # Basic square and multiply algorithm
+        # Todo: Make constant time(ish)
+        # Definatly not constant time crypto!
+        power = bin(int(power))
+        power = power[3:]  # Removes '0b1' from number
+        ret = self
+        for i in power:
+            ret = ret.square()
+            if i == '1':
+                ret *= self
+        return ret
+
     def __str__(self):
         return 'Fq6(' + str(self.c0) + ' + ' + str(self.c1) + ' * v + ' + str(self.c2) + ' * v^2)'
 
@@ -287,7 +328,7 @@ class Fq6(tuple):
         c1 -= self.c0*self.c1
 
         c2 = self.c1
-        c2 = c2*c2
+        c2 = c2.square()
         c2 -= self.c0*self.c2
 
         tmp1 = self.c2*c1
@@ -303,10 +344,11 @@ class Fq6(tuple):
         c2 *= tmp1
         return Fq6(c0, c1, c2)
 
+    def square(self):
+        return self * self
+
     def mul_by_nonresidue(self):
-        c0 = self.c2
-        c1 = self.c0
-        c2 = self.c1
+        c1, c2, c0 = self
         c0 = c0.mul_by_nonresidue()
         return Fq6(c0, c1, c2)
 
@@ -322,12 +364,20 @@ class Fq6(tuple):
 
     @classmethod
     def one(cls, q):
-        return cls(Fq2.one(q), Fq2.zero(q), Fq2.zero(q))
+        return cls.to_cls(Fq.one(q), q)
+
+    @classmethod
+    def to_cls(cls, obj, q):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (int, Fq, Fq2)):
+            return Fq6(Fq2.to_cls(obj, q), Fq2.zero(q), Fq2.zero(q))
+        raise NotImplementedError
 
     @property
     def q(self):
         return self[0].q
-    
+
     @property
     def c0(self):
         return self[0]
@@ -346,14 +396,13 @@ class Fq12(tuple):
         return super().__new__(cls, (c0, c1))
 
     def __neg__(self):
-        c0 = -self.c0
-        c1 = -self.c1
-        return Fq12(c0, c1)
+        c = (-c_self for c_self in self)
+        return Fq12(*c)
 
     def __add__(self, other):
-        c0 = self.c0 + other.c0
-        c1 = self.c1 + other.c1
-        return Fq12(c0, c1)
+        other = self.to_cls(other, self.q)
+        c = (c_self + c_other for c_self, c_other in zip(self, other))
+        return Fq12(*c)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -365,6 +414,7 @@ class Fq12(tuple):
         return other + -self
 
     def __mul__(self, other):
+        other = self.to_cls(other, self.q)
         aa = self.c0 * other.c0
         bb = self.c1 * other.c1
         o = other.c0 + other.c1
@@ -379,8 +429,25 @@ class Fq12(tuple):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __truediv__(self, other):
+        other = self.to_cls(other, self.q)
+        return self * other.inverse()
+
     def __rdiv__(self, other):
         return other * self.inverse()
+
+    def __pow__(self, power):
+        # Basic square and multiply algorithm
+        # Todo: Make constant time(ish)
+        # Definatly not constant time crypto!
+        power = bin(int(power))
+        power = power[3:]  # Removes '0b1' from number
+        ret = self
+        for i in power:
+            ret = ret.square()
+            if i == '1':
+                ret *= self
+        return ret
 
     def __str__(self):
         return 'Fq12(' + str(self.c0) + ' + ' + str(self.c1) + ' * w)'
@@ -397,6 +464,9 @@ class Fq12(tuple):
         t1 = -t1
         return Fq12(t0, t1)
 
+    def square(self):
+        return self * self
+
     def is_zero(self):
         return self.c0.is_zero() and self.c1.is_zero()
 
@@ -409,7 +479,15 @@ class Fq12(tuple):
 
     @classmethod
     def one(cls, q):
-        return cls(Fq6.one(q), Fq6.zero(q))
+        return cls.to_cls(Fq.one(q), q)
+
+    @classmethod
+    def to_cls(cls, obj, q):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (int, Fq, Fq2, Fq6)):
+            return Fq12(Fq6.to_cls(obj, q), Fq6.zero(q))
+        raise NotImplementedError
 
     @property
     def q(self):
@@ -436,7 +514,7 @@ if __name__ == '__main__':
     f = Fq12(d, e)
 
     # Check inversion in Fq12
-    print((f*f.inverse()).is_one())
+    print((f/f).is_one())
 
     # Check sqrt in Fq (q % 4 == 3)
     z = Fq(3, 11)
