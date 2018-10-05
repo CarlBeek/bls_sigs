@@ -24,7 +24,7 @@ class EC(object):
 
     def __add__(self, other):
         '''
-        These check are included for the sake of completeness.
+        These checks are included for the sake of completeness.
         In reality, these cases will never be reached and thus could be ommited
         '''
         # Addition is trivial when one of the points is infinity:
@@ -100,7 +100,7 @@ class EC(object):
     def is_on_curve(self):
         if self.is_infinity():
             return True
-        return self.Y**2 == self.X**3 + params.b*(self.Z**6)
+        return self.y**2 == self.x**3 + params.b * self.x.all_one_poly(self.x.q)
 
     def as_affine(self):
         return self.x, self.y, self.is_infinity()
@@ -129,16 +129,15 @@ class EC(object):
 
     @classmethod
     def get_point_from_x(cls, X, greatest=False):
-        X3b = X ** 3 + params.b
-        Y = X3b.sqrt()
+        try:
+            X3b = X ** 3 + params.b * X.all_one_poly(X.q)  # All one poly needed for twisted curve in Fq2
+            Y = X3b.sqrt()
+        except ArithmeticError as e:
+            raise ValueError('Point is not on curve') from e
         if greatest and Y < - Y:
             Y = - Y
         return cls(X, Y, X.one(X.q))
 
-
-if __name__ == '__main__':
-    A = EC.get_point_from_x(Fq2(Fq(4, 19), Fq(6, 19)), True)
-    B = EC.get_point_from_x(Fq2(Fq(7, 19), Fq(11, 19)), True)
-
-    print((A-A).is_infinity())
-    print((B * 7) == (B+B+B+B+B+B+B))
+    @classmethod
+    def infinity(cls, basefield):
+        return cls.from_affine(basefield, basefield, True)

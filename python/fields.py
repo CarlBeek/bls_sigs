@@ -89,6 +89,10 @@ class Fq(int):
         return cls(1, q)
 
     @classmethod
+    def all_one_poly(cls, q):
+        return cls.one(q)
+
+    @classmethod
     def to_cls(cls, obj, q):
         if isinstance(obj, cls):
             return obj
@@ -155,6 +159,20 @@ class Fq2(tuple):
                 ret *= self
         return ret
 
+    def __gt__(self, other):
+        other = self.to_cls(other, self.q)
+        if self.c1 > other.c1:
+            return True
+        elif self.c1 < other.c1:
+            return False
+        elif self.c0 > other.c0:
+            return True
+        return False
+
+    def __lt__(self, other):
+        other = self.to_cls(other, self.q)
+        return not (self > other and self == other)
+
     def __str__(self):
         return 'Fq2(' + str(self.c0) + ' + ' + str(self.c1) + ' * u)'
 
@@ -206,13 +224,15 @@ class Fq2(tuple):
         return cls.to_cls(Fq.one(q), q)
 
     @classmethod
+    def all_one_poly(cls, q):
+        return cls(Fq.one(q), Fq.one(q))
+
+    @classmethod
     def to_cls(cls, obj, q):
         if isinstance(obj, cls):
             return obj
         elif isinstance(obj, (int, Fq)):
             return Fq2(Fq.to_cls(obj, q), Fq.zero(q))
-        print(obj)
-        print(type(obj))
         raise NotImplementedError
 
     @property
@@ -312,6 +332,24 @@ class Fq6(tuple):
                 ret *= self
         return ret
 
+    def __gt__(self, other):
+        other = self.to_cls(other, self.q)
+        if self.c2 > other.c2:
+            return True
+        elif self.c2 < other.c2:
+            return False
+        elif self.c1 > other.c1:
+            return True
+        elif self.c1 < other.c1:
+            return False
+        elif self.c0 > other.c0:
+            return True
+        return False
+
+    def __lt__(self, other):
+        other = self.to_cls(other, self.q)
+        return not (self > other and self == other)
+
     def __str__(self):
         return 'Fq6(' + str(self.c0) + ' + ' + str(self.c1) + ' * v + ' + str(self.c2) + ' * v^2)'
 
@@ -339,6 +377,8 @@ class Fq6(tuple):
         tmp1 += tmp2
 
         tmp1 = tmp1.inverse()
+        if tmp1.is_zero():
+            raise ArithmeticError
         c0 *= tmp1
         c1 *= tmp1
         c2 *= tmp1
@@ -449,6 +489,20 @@ class Fq12(tuple):
                 ret *= self
         return ret
 
+    def __gt__(self, other):
+        other = self.to_cls(other, self.q)
+        if self.c1 > other.c1:
+            return True
+        elif self.c1 < other.c1:
+            return False
+        elif self.c0 > other.c0:
+            return True
+        return False
+
+    def __lt__(self, other):
+        other = self.to_cls(other, self.q)
+        return not (self > other and self == other)
+
     def __str__(self):
         return 'Fq12(' + str(self.c0) + ' + ' + str(self.c1) + ' * w)'
 
@@ -500,24 +554,3 @@ class Fq12(tuple):
     @property
     def c1(self):
         return self[1]
-
-
-if __name__ == '__main__':
-    # Todo: Replace with proper test cases.
-    a = Fq2(Fq(3, 11), Fq(4, 11))
-    b = Fq2(Fq(7, 11), Fq(8, 11))
-    c = Fq2(Fq(8, 11), Fq(14, 11))
-
-    d = Fq6(a, b, c)
-    e = Fq6(c, b, a)
-
-    f = Fq12(d, e)
-
-    # Check inversion in Fq12
-    print((f/f).is_one())
-
-    # Check sqrt in Fq (q % 4 == 3)
-    z = Fq(3, 11)
-    print(z.sqrt()*z.sqrt() == z)
-    print(a.sqrt().square() == a)
-    print(b.square().sqrt() == b)
