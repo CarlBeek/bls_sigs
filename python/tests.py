@@ -1,7 +1,7 @@
 import unittest
 
 from fields import Fq, Fq2, Fq6, Fq12
-from ec import EC
+from ec import EC, TwistedEC
 import params
 
 
@@ -70,11 +70,11 @@ class TestEC(unittest.TestCase):
 
         self.a2 = Fq2(self.b1, self.a1)
         self.b2 = Fq2(self.b1, self.c1)
-        self.A2 = EC.get_point_from_x(self.a2)
-        self.B2 = EC.get_point_from_x(self.b2)
+        self.A2 = TwistedEC.get_point_from_x(self.a2)
+        self.B2 = TwistedEC.get_point_from_x(self.b2)
 
         self.g1 = EC.from_affine(Fq(params.g1_x, params.q), Fq(params.g1_y, params.q))
-        self.g2 = EC.from_affine(Fq2(Fq(params.g2_x0, params.q), Fq(params.g2_x1, params.q)),
+        self.g2 = TwistedEC.from_affine(Fq2(Fq(params.g2_x0, params.q), Fq(params.g2_x1, params.q)),
                                  Fq2(Fq(params.g2_y0, params.q), Fq(params.g2_y1, params.q)))
 
     def test_EC_over_Fq(self):
