@@ -21,7 +21,7 @@ g2_y = Fq2(g2_y0, g2_y1)
 
 
 # BLS Params
-BLS_x = bin(0xd201000000010000)[2:]
+BLS_x = 0xd201000000010000
 BLS_negative = True
 
 # Frobenius map coefficients

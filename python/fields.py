@@ -209,6 +209,10 @@ class Fq2(tuple):
         b = (self.__class__.one(self.q) + alpha)**((self.q - 1)/2)
         return b * x0
 
+    def frobenius_endo(self, power):
+        from params import FROB_FQ2
+        return self.__class__(self.c0, self.c1 * FROB_FQ2[power % 2])
+
     def is_zero(self):
         return self.c0.is_zero() and self.c1.is_zero()
 
@@ -392,6 +396,16 @@ class Fq6(tuple):
         c0 = c0.mul_by_nonresidue()
         return self.__class__(c0, c1, c2)
 
+    def frobenius_endo(self, power):
+        from params import FROB_FQ6_C1, FROB_FQ6_C2
+        c0 = self.c0.frobenius_endo(power)
+        c1 = self.c1.frobenius_endo(power)
+        c2 = self.c2.frobenius_endo(power)
+
+        c1 *= FROB_FQ6_C1[power % 6]
+        c2 *= FROB_FQ6_C2[power % 6]
+        return self.__class__(c0, c1, c2)
+
     def is_zero(self):
         return self.c0.is_zero() and self.c1.is_zero() and self.c2.is_zero()
 
@@ -520,6 +534,17 @@ class Fq12(tuple):
 
     def square(self):
         return self * self
+
+    def frobenius_endo(self, power):
+        from params import FROB_FQ12_C1
+        c0 = self.c0.frobenius_endo(power)
+        c1 = self.c1.frobenius_endo(power)
+
+        c1c0 = c1.c0 * FROB_FQ12_C1[power % 12]
+        c1c1 = c1.c1 * FROB_FQ12_C1[power % 12]
+        c1c2 = c1.c2 * FROB_FQ12_C1[power % 12]
+
+        return self.__class__(c0, Fq6(c1c0, c1c1, c1c2))
 
     def is_zero(self):
         return self.c0.is_zero() and self.c1.is_zero()

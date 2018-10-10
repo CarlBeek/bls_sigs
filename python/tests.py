@@ -5,6 +5,7 @@ from fields import Fq, Fq2, Fq6, Fq12
 from ec import EC, TwistedEC
 from params import q, r, g1_x, g1_y, g2_x, g2_y, FROB_FQ2, FROB_FQ6_C1, FROB_FQ6_C2, FROB_FQ12_C1
 from BLS import sign, verify, key_gen
+from paring import twist, untwist, paring
 
 
 class TestFields(unittest.TestCase):
@@ -129,6 +130,9 @@ class TestParing(unittest.TestCase):
         self.sigma_0 = sign(self.msg_0, self.sk_0)
         self.sigma_1 = sign(self.msg_1, self.sk_1)
 
+    def test_twisting(self):
+        self.assertEqual(self.g2, twist(untwist(self.g2)))
+
     def test_pk_on_curve(self):
         self.assertTrue(self.pk_0.is_on_curve())
         self.assertTrue(self.pk_1.is_on_curve())
@@ -140,6 +144,9 @@ class TestParing(unittest.TestCase):
     def test_signature_is_on_curve(self):
         self.assertTrue(self.msg_0.is_on_curve())
         self.assertTrue(self.msg_1.is_on_curve())
+
+    def test_paring_func(self):
+        self.assertEqual(paring(self.g1 * self.sk_0, self.g2, True), paring(self.g1, self.g2 * self.sk_0, True))
 
     def test_invalid_sig(self):
         self.assertFalse(verify(self.msg_0, self.sigma_0, self.pk_1))
