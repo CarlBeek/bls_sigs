@@ -1,8 +1,10 @@
 import unittest
+from random import uniform
 
 from fields import Fq, Fq2, Fq6, Fq12
 from ec import EC, TwistedEC
-import params
+from params import q, r, g1_x, g1_y, g2_x, g2_y, FROB_FQ2, FROB_FQ6_C1, FROB_FQ6_C2, FROB_FQ12_C1
+from BLS import sign, verify, key_gen
 
 
 class TestFields(unittest.TestCase):
@@ -13,7 +15,7 @@ class TestFields(unittest.TestCase):
         self.d1 = Fq(12, 11)
         self.e1 = Fq(2, 11)
         self.f1 = Fq(9, 11)
-        self.g1 = Fq(8, 11)
+        self.g1 = Fq(6, 11)
 
         self.a2 = Fq2(self.a1, self.b1)
         self.b2 = Fq2(self.b1, self.c1)
@@ -36,7 +38,7 @@ class TestFields(unittest.TestCase):
         self.assertTrue((self.a1 * self.b1 / self.b1 / self.a1).is_one())
         self.assertEqual(self.a1.sqrt().square(), self.a1)
         self.assertEqual(self.a1 ** 3, self.a1 * self.a1 * self.a1)
-        
+
     def test_Fq2(self):
         self.assertEqual(self.a2 + self.a2, self.a2 * 2)
         self.assertTrue((self.a2 - self.a2).is_zero())
@@ -44,21 +46,29 @@ class TestFields(unittest.TestCase):
         self.assertTrue((self.a2 * self.b2 / self.b2 / self.a2).is_one())
         self.assertEqual(self.a2.sqrt().square(), self.a2)
         self.assertEqual(self.a2 ** 3, self.a2 * self.a2 * self.a2)
-        
+
     def test_Fq6(self):
         self.assertEqual(self.a6 + self.a6, self.a6 * 2)
         self.assertTrue((self.a6 - self.a6).is_zero())
         self.assertEqual(self.a6 + self.a6 + self.a6 + self.b6 + self.b6, 3 * self.a6 + 2 * self.b6)
         self.assertTrue((self.a6 * self.b6 / self.b6 / self.a6).is_one())
         self.assertEqual(self.a6 ** 3, self.a6 * self.a6 * self.a6)
-        
+
     def test_Fq12(self):
         self.assertEqual(self.a12 + self.a12, self.a12 * 2)
         self.assertTrue((self.a12 - self.a12).is_zero())
         self.assertEqual(self.a12 + self.a12 + self.a12 + self.b12 + self.b12, 3 * self.a12 + 2 * self.b12)
         self.assertTrue((self.a12 * self.b12 / self.b12 / self.a12).is_one())
         self.assertEqual(self.a12 ** 3, self.a12 * self.a12 * self.a12)
-        
+
+
+class TestParams(unittest.TestCase):
+    def test_frobenius_coefficients(self):
+        self.assertEqual(tuple(Fq(-1, q) ** (((q ** i) - 1) / 2) for i in range(0, 2)), FROB_FQ2)
+        self.assertEqual(tuple(Fq2.all_one_poly(q) ** (((q ** i) - 1) // 3) for i in range(0, 6)), FROB_FQ6_C1)
+        self.assertEqual(tuple(Fq2.all_one_poly(q) ** (((2 * q ** i) - 2) // 3) for i in range(0, 6)), FROB_FQ6_C2)
+        self.assertEqual(tuple(Fq2.all_one_poly(q) ** (((q ** i) - 1) // 6) for i in range(0, 12)), FROB_FQ12_C1)
+
 
 class TestEC(unittest.TestCase):
     def setUp(self):
@@ -73,27 +83,80 @@ class TestEC(unittest.TestCase):
         self.A2 = TwistedEC.get_point_from_x(self.a2)
         self.B2 = TwistedEC.get_point_from_x(self.b2)
 
-        self.g1 = EC.from_affine(Fq(params.g1_x, params.q), Fq(params.g1_y, params.q))
-        self.g2 = TwistedEC.from_affine(Fq2(Fq(params.g2_x0, params.q), Fq(params.g2_x1, params.q)),
-                                 Fq2(Fq(params.g2_y0, params.q), Fq(params.g2_y1, params.q)))
+        self.g1 = EC.from_affine(g1_x, g1_y)
+        self.g2 = TwistedEC.from_affine(g2_x, g2_y)
 
     def test_EC_over_Fq(self):
         self.assertTrue(self.A1.is_on_curve())
+        self.assertEqual(self.A1 + self.A1, self.A1.double())
+        self.assertTrue((self.A1 + self.A1).is_on_curve())
+        self.assertTrue(self.A1.double().is_on_curve())
+        self.assertTrue((self.A1 * 100).is_on_curve())
         self.assertTrue((self.A1 - self.A1).is_infinity())
         self.assertEqual((self.A1 + EC.infinity(self.a1)), self.A1)
         self.assertEqual(self.A1 + self.A1 + self.A1 + self.B1 + self.B1, 3 * self.A1 + 2 * self.B1)
 
-    def test_EC_over_Fq2(self):
+    def test_twisted_EC_over_Fq2(self):
         self.assertTrue(self.A2.is_on_curve())
+        self.assertEqual(self.A2 + self.A2, self.A2.double())
+        self.assertTrue((self.A2 + self.A2).is_on_curve())
+        self.assertTrue(self.A2.double().is_on_curve())
+        self.assertTrue((self.A2*100).is_on_curve())
         self.assertTrue((self.A2 - self.A2).is_infinity())
         self.assertEqual((self.A2 + EC.infinity(self.a2)), self.A2)
         self.assertEqual(self.A2 + self.A2 + self.A2 + self.B2 + self.B2, 3 * self.A2 + 2 * self.B2)
 
     def test_g1_on_curve(self):
         self.assertTrue(self.g1.is_on_curve())
+        self.assertTrue((self.g1 * 5).is_on_curve())
 
     def test_g2_on_curve(self):
         self.assertTrue(self.g2.is_on_curve())
+        self.assertTrue((self.g2 * 5).is_on_curve())
+
+
+class TestParing(unittest.TestCase):
+    def setUp(self):
+        self.g1 = EC.from_affine(g1_x, g1_y)
+        self.g2 = TwistedEC.from_affine(g2_x, g2_y)
+
+        self.sk_0 = int(uniform(1, r))
+        self.sk_1 = int(uniform(1, r))
+        self.pk_0 = key_gen(self.sk_0)
+        self.pk_1 = key_gen(self.sk_1)
+        self.msg_0 = self.g2 * int(uniform(1, r))
+        self.msg_1 = self.g2 * int(uniform(1, r))
+        self.sigma_0 = sign(self.msg_0, self.sk_0)
+        self.sigma_1 = sign(self.msg_1, self.sk_1)
+
+    def test_pk_on_curve(self):
+        self.assertTrue(self.pk_0.is_on_curve())
+        self.assertTrue(self.pk_1.is_on_curve())
+
+    def test_msg_on_curve(self):
+        self.assertTrue(self.msg_0.is_on_curve())
+        self.assertTrue(self.msg_1.is_on_curve())
+
+    def test_signature_is_on_curve(self):
+        self.assertTrue(self.msg_0.is_on_curve())
+        self.assertTrue(self.msg_1.is_on_curve())
+
+    def test_invalid_sig(self):
+        self.assertFalse(verify(self.msg_0, self.sigma_0, self.pk_1))
+        self.assertFalse(verify(self.msg_0, self.sigma_1, self.pk_0))
+        self.assertFalse(verify(self.msg_0, self.sigma_1, self.pk_1))
+        self.assertFalse(verify(self.msg_1, self.sigma_0, self.pk_0))
+        self.assertFalse(verify(self.msg_1, self.sigma_0, self.pk_1))
+        self.assertFalse(verify(self.msg_1, self.sigma_1, self.pk_0))
+
+    def test_valid_sig(self):
+        self.assertTrue(verify(self.msg_0, self.sigma_0, self.pk_0))
+        self.assertTrue(verify(self.msg_1, self.sigma_1, self.pk_1))
+
+    def test_sigs_combinable(self):
+        self.assertTrue(verify(self.msg_0 + self.msg_1,
+                               self.sigma_0 + self.sigma_1,
+                               self.pk_0 + self.pk_1))
 
 
 if __name__ == '__main__':

@@ -1,6 +1,4 @@
 import params
-from fields import Fq, Fq2
-
 
 class EC(object):
     def __init__(self, X, Y, Z):
@@ -15,11 +13,12 @@ class EC(object):
     def __str__(self):
         if self.is_infinity():
             return 'Infinity'
+            return 'Infinity'
         return 'X = ' + str(self.X) + ', Y = ' + str(self.Y) + ', Z = ' + str(self.Z)
 
     def __neg__(self):
         if not self.is_infinity():
-            return EC(self.X, - self.Y, self.Z)
+            return self.__class__(self.X, - self.Y, self.Z)
         return self
 
     def __add__(self, other):
@@ -51,7 +50,7 @@ class EC(object):
         X3 = r.square() - J - (2 * V)
         Y3 = r * (V-X3) - (2 * S1 * J)
         Z3 = ((self.Z + other.Z).square() - Z1Z1 - Z2Z2) * H
-        return EC(X3, Y3, Z3)
+        return self.__class__(X3, Y3, Z3)
 
     def __sub__(self, other):
         return self + other.__neg__()
@@ -92,7 +91,7 @@ class EC(object):
         X3 = F - 2 * D
         Y3 = E * (D - X3) - 8 * C
         Z3 = 2 * self.Y * self.Z
-        return EC(X3, Y3, Z3)
+        return self.__class__(X3, Y3, Z3)
 
     def is_infinity(self):
         return self.Z.is_zero()

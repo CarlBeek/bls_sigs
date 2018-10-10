@@ -97,7 +97,7 @@ class Fq(int):
         if isinstance(obj, cls):
             return obj
         elif isinstance(obj, int):
-            return Fq(obj, q)
+            return cls(obj, q)
         raise NotImplementedError
 
 
@@ -107,13 +107,13 @@ class Fq2(tuple):
 
     def __add__(self, other):
         other = self.to_cls(other, self.q)
-        return Fq2(self.c0 + other.c0, self.c1 + other.c1)
+        return self.__class__(self.c0 + other.c0, self.c1 + other.c1)
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __neg__(self):
-        return Fq2(-self.c0, -self.c1)
+        return self.__class__(-self.c0, -self.c1)
 
     def __sub__(self, other):
         other = self.to_cls(other, self.q)
@@ -133,7 +133,7 @@ class Fq2(tuple):
         c1 -= aa
         c1 -= bb
         c0 = aa - bb
-        return Fq2(c0, c1)
+        return self.__class__(c0, c1)
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -187,7 +187,7 @@ class Fq2(tuple):
         a = self.c0*t0
         b = self.c1*t0
         b = -b
-        return Fq2(a, b)
+        return self.__class__(a, b)
 
     def square(self):
         return self * self
@@ -195,7 +195,7 @@ class Fq2(tuple):
     def sqrt(self):
         # Modified Tonelli-Shanks for q==3 mod 4
         # https://eprint.iacr.org/2012/685.pdf  Algorithm 9
-        assert self.q # q%4 == 3 This can ultimately be removed for BLS12-381
+        assert self.q%4==3 # q%4 == 3 This can ultimately be removed for BLS12-381
         a1 = self ** ((self.q - 3) / 4)
         alpha = a1.square() * self
         a0 = alpha**(self.q+1)
@@ -205,8 +205,8 @@ class Fq2(tuple):
         x0 = a1 * self
         if alpha == -Fq2.one(self.q):
             # This returns i*x0 (i=sqrt(-1))
-            return Fq2(Fq(0, self.q), Fq(-1, self.q).sqrt())*x0
-        b = (Fq2.one(self.q) + alpha)**((self.q - 1)/2)
+            return self.__class__(Fq(0, self.q), Fq(-1, self.q).sqrt())*x0
+        b = (self.__class__.one(self.q) + alpha)**((self.q - 1)/2)
         return b * x0
 
     def is_zero(self):
@@ -232,7 +232,7 @@ class Fq2(tuple):
         if isinstance(obj, cls):
             return obj
         elif isinstance(obj, (int, Fq)):
-            return Fq2(Fq.to_cls(obj, q), Fq.zero(q))
+            return cls(Fq.to_cls(obj, q), Fq.zero(q))
         raise NotImplementedError
 
     @property
@@ -254,12 +254,12 @@ class Fq6(tuple):
 
     def __neg__(self):
         c = (-c_self for c_self in self)
-        return Fq6(*c)
+        return self.__class__(*c)
 
     def __add__(self, other):
         other = self.to_cls(other, self.q)
         c = (c_self + c_other for c_self, c_other in zip(self, other))
-        return Fq6(*c)
+        return self.__class__(*c)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -307,7 +307,7 @@ class Fq6(tuple):
         t2 -= bb
         t2 += cc.mul_by_nonresidue()
 
-        return Fq6(t1, t2, t3)
+        return self.__class__(t1, t2, t3)
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -382,7 +382,7 @@ class Fq6(tuple):
         c0 *= tmp1
         c1 *= tmp1
         c2 *= tmp1
-        return Fq6(c0, c1, c2)
+        return self.__class__(c0, c1, c2)
 
     def square(self):
         return self * self
@@ -390,7 +390,7 @@ class Fq6(tuple):
     def mul_by_nonresidue(self):
         c1, c2, c0 = self
         c0 = c0.mul_by_nonresidue()
-        return Fq6(c0, c1, c2)
+        return self.__class__(c0, c1, c2)
 
     def is_zero(self):
         return self.c0.is_zero() and self.c1.is_zero() and self.c2.is_zero()
@@ -411,7 +411,7 @@ class Fq6(tuple):
         if isinstance(obj, cls):
             return obj
         elif isinstance(obj, (int, Fq, Fq2)):
-            return Fq6(Fq2.to_cls(obj, q), Fq2.zero(q), Fq2.zero(q))
+            return cls(Fq2.to_cls(obj, q), Fq2.zero(q), Fq2.zero(q))
         raise NotImplementedError
 
     @property
@@ -437,12 +437,12 @@ class Fq12(tuple):
 
     def __neg__(self):
         c = (-c_self for c_self in self)
-        return Fq12(*c)
+        return self.__class__(*c)
 
     def __add__(self, other):
         other = self.to_cls(other, self.q)
         c = (c_self + c_other for c_self, c_other in zip(self, other))
-        return Fq12(*c)
+        return self.__class__(*c)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -464,7 +464,7 @@ class Fq12(tuple):
         c1 -= bb
         c0 = bb.mul_by_nonresidue()
         c0 += aa
-        return Fq12(c0, c1)
+        return self.__class__(c0, c1)
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -516,7 +516,7 @@ class Fq12(tuple):
         t0 = t * self.c0
         t1 = t * self.c1
         t1 = -t1
-        return Fq12(t0, t1)
+        return self.__class__(t0, t1)
 
     def square(self):
         return self * self
@@ -540,7 +540,7 @@ class Fq12(tuple):
         if isinstance(obj, cls):
             return obj
         elif isinstance(obj, (int, Fq, Fq2, Fq6)):
-            return Fq12(Fq6.to_cls(obj, q), Fq6.zero(q))
+            return cls(Fq6.to_cls(obj, q), Fq6.zero(q))
         raise NotImplementedError
 
     @property
