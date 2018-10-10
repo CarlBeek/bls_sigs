@@ -127,8 +127,10 @@ class TestParing(unittest.TestCase):
         self.pk_1 = key_gen(self.sk_1)
         self.msg_0 = self.g2 * int(uniform(1, r))
         self.msg_1 = self.g2 * int(uniform(1, r))
-        self.sigma_0 = sign(self.msg_0, self.sk_0)
-        self.sigma_1 = sign(self.msg_1, self.sk_1)
+        self.sigma_0_0 = sign(self.msg_0, self.sk_0)
+        self.sigma_0_1 = sign(self.msg_0, self.sk_1)
+        self.sigma_1_0 = sign(self.msg_1, self.sk_0)
+        self.sigma_1_1 = sign(self.msg_1, self.sk_1)
 
     def test_twisting(self):
         self.assertEqual(self.g2, twist(untwist(self.g2)))
@@ -149,21 +151,19 @@ class TestParing(unittest.TestCase):
         self.assertEqual(paring(self.g1 * self.sk_0, self.g2, True), paring(self.g1, self.g2 * self.sk_0, True))
 
     def test_invalid_sig(self):
-        self.assertFalse(verify(self.msg_0, self.sigma_0, self.pk_1))
-        self.assertFalse(verify(self.msg_0, self.sigma_1, self.pk_0))
-        self.assertFalse(verify(self.msg_0, self.sigma_1, self.pk_1))
-        self.assertFalse(verify(self.msg_1, self.sigma_0, self.pk_0))
-        self.assertFalse(verify(self.msg_1, self.sigma_0, self.pk_1))
-        self.assertFalse(verify(self.msg_1, self.sigma_1, self.pk_0))
+        self.assertFalse(verify(self.msg_0, self.sigma_0_0, self.pk_1))
+        self.assertFalse(verify(self.msg_0, self.sigma_1_1, self.pk_0))
+        self.assertFalse(verify(self.msg_0, self.sigma_1_1, self.pk_1))
+        self.assertFalse(verify(self.msg_1, self.sigma_0_0, self.pk_0))
+        self.assertFalse(verify(self.msg_1, self.sigma_0_0, self.pk_1))
+        self.assertFalse(verify(self.msg_1, self.sigma_1_1, self.pk_0))
 
     def test_valid_sig(self):
-        self.assertTrue(verify(self.msg_0, self.sigma_0, self.pk_0))
-        self.assertTrue(verify(self.msg_1, self.sigma_1, self.pk_1))
+        self.assertTrue(verify(self.msg_0, self.sigma_0_0, self.pk_0))
+        self.assertTrue(verify(self.msg_1, self.sigma_1_1, self.pk_1))
 
-    def test_sigs_combinable(self):
-        self.assertTrue(verify(self.msg_0 + self.msg_1,
-                               self.sigma_0 + self.sigma_1,
-                               self.pk_0 + self.pk_1))
+    def test_sigs_aggregate(self):
+        self.assertTrue(verify(self.msg_0, self.sigma_0_0 + self.sigma_0_1, self.pk_0 + self.pk_1))
 
 
 if __name__ == '__main__':
