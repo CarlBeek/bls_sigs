@@ -41,8 +41,8 @@ class Fq(int):
         # Todo: Make constant time(ish)
         # Definatly not constant time crypto!
         power = bin(int(power))
-        power = power[3:]  # Removes '0b1' from number
-        ret = self
+        power = power[2:]  # Removes '0b' from number
+        ret = self.__class__.one(self.q)
         for i in power:
             ret = ret.square()
             if i == '1':
@@ -151,8 +151,8 @@ class Fq2(tuple):
         # Todo: Make constant time(ish)
         # Definatly not constant time crypto!
         power = bin(int(power))
-        power = power[3:]  # Removes '0b1' from number
-        ret = self
+        power = power[2:]  # Removes '0b' from number
+        ret = self.__class__.one(self.q)
         for i in power:
             ret = ret.square()
             if i == '1':
@@ -206,7 +206,7 @@ class Fq2(tuple):
         if alpha == -Fq2.one(self.q):
             # This returns i*x0 (i=sqrt(-1))
             return self.__class__(Fq(0, self.q), Fq(-1, self.q).sqrt())*x0
-        b = (self.__class__.one(self.q) + alpha)**((self.q - 1)/2)
+        b = (self.__class__.one(self.q) + alpha)**((self.q - 1)//2)
         return b * x0
 
     def frobenius_endo(self, power):
@@ -328,8 +328,8 @@ class Fq6(tuple):
         # Todo: Make constant time(ish)
         # Definatly not constant time crypto!
         power = bin(int(power))
-        power = power[3:]  # Removes '0b1' from number
-        ret = self
+        power = power[2:]  # Removes '0b' from number
+        ret = self.__class__.one(self.q)
         for i in power:
             ret = ret.square()
             if i == '1':
@@ -495,8 +495,8 @@ class Fq12(tuple):
         # Todo: Make constant time(ish)
         # Definatly not constant time crypto!
         power = bin(int(power))
-        power = power[3:]  # Removes '0b1' from number
-        ret = self
+        power = power[2:]  # Removes '0b' from number
+        ret = self.__class__.one(self.q)
         for i in power:
             ret = ret.square()
             if i == '1':
