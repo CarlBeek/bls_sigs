@@ -43,12 +43,12 @@ class EC(object):
         S1 = self.Y * other.Z * Z2Z2
         S2 = other.Y * self.Z * Z1Z1
         H = U2 - U1
-        I = (2 * H).square()
+        I = (self.to_basefield(2) * H).square()
         J = H * I
-        r = 2 * (S2-S1)
+        r = self.to_basefield(2) * (S2-S1)
         V = U1*I
-        X3 = r.square() - J - (2 * V)
-        Y3 = r * (V-X3) - (2 * S1 * J)
+        X3 = r.square() - J - (self.to_basefield(2) * V)
+        Y3 = r * (V-X3) - (self.to_basefield(2) * S1 * J)
         Z3 = ((self.Z + other.Z).square() - Z1Z1 - Z2Z2) * H
         return self.__class__(X3, Y3, Z3)
 
@@ -85,12 +85,12 @@ class EC(object):
         A = self.X.square()
         B = self.Y.square()
         C = B.square()
-        D = 2 * ((self.X + B).square() - A - C)
-        E = 3 * A
+        D = self.to_basefield(2) * ((self.X + B).square() - A - C)
+        E = self.to_basefield(3) * A
         F = E.square()
-        X3 = F - 2 * D
-        Y3 = E * (D - X3) - 8 * C
-        Z3 = 2 * self.Y * self.Z
+        X3 = F - self.to_basefield(2) * D
+        Y3 = E * (D - X3) - self.to_basefield(8) * C
+        Z3 = self.to_basefield(2) * self.Y * self.Z
         return self.__class__(X3, Y3, Z3)
 
     def is_infinity(self):
@@ -99,10 +99,13 @@ class EC(object):
     def is_on_curve(self):
         if self.is_infinity():
             return True
-        return self.y**2 == self.x**3 + params.b\
+        return self.y**2 == self.x**3 + params.b
 
     def as_affine(self):
         return self.x, self.y, self.is_infinity()
+
+    def to_basefield(self, _x):
+        return self.X.__class__(_x, self.X.q)
 
     @property
     def x(self):
@@ -120,9 +123,9 @@ class EC(object):
     def basefield_one(self):
         return self.X.one(self.X.q)
 
-    @property
-    def basefield(self):
-        return self.X.__class__()
+    # @property
+    # def basefield(self):
+    #     return self.X.__class__
 
     @classmethod
     def from_affine(cls, x, y, infinity=False):

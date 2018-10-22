@@ -33,32 +33,28 @@ class TestFields(unittest.TestCase):
         self.b12 = Fq12(self.b6, self.c6)
 
     def test_Fq(self):
-        self.assertEqual(self.a1 + self.a1, self.a1 * 2)
+        self.assertEqual(self.a1 + self.a1, self.a1 * self.a1.to_cls(2, self.a1.q))
         self.assertTrue((self.a1 - self.a1).is_zero())
-        self.assertEqual(self.a1 + self.a1 + self.a1 + self.b1 + self.b1,  3 * self.a1 + 2 * self.b1)
         self.assertTrue((self.a1 * self.b1 / self.b1 / self.a1).is_one())
         self.assertEqual(self.a1.sqrt().square(), self.a1)
         self.assertEqual(self.a1 ** 3, self.a1 * self.a1 * self.a1)
 
     def test_Fq2(self):
-        self.assertEqual(self.a2 + self.a2, self.a2 * 2)
+        self.assertEqual(self.a2 + self.a2, self.a2 * self.a2.to_cls(2, self.a2.q))
         self.assertTrue((self.a2 - self.a2).is_zero())
-        self.assertEqual(self.a2 + self.a2 + self.a2 + self.b2 + self.b2, 3 * self.a2 + 2 * self.b2)
         self.assertTrue((self.a2 * self.b2 / self.b2 / self.a2).is_one())
         self.assertEqual(self.a2.sqrt().square(), self.a2)
         self.assertEqual(self.a2 ** 3, self.a2 * self.a2 * self.a2)
 
     def test_Fq6(self):
-        self.assertEqual(self.a6 + self.a6, self.a6 * 2)
+        self.assertEqual(self.a6 + self.a6, self.a6 * self.a6.to_cls(2, self.a6.q))
         self.assertTrue((self.a6 - self.a6).is_zero())
-        self.assertEqual(self.a6 + self.a6 + self.a6 + self.b6 + self.b6, 3 * self.a6 + 2 * self.b6)
         self.assertTrue((self.a6 * self.b6 / self.b6 / self.a6).is_one())
         self.assertEqual(self.a6 ** 3, self.a6 * self.a6 * self.a6)
 
     def test_Fq12(self):
-        self.assertEqual(self.a12 + self.a12, self.a12 * 2)
+        self.assertEqual(self.a12 + self.a12, self.a12 * self.a12.to_cls(2, self.a12.q))
         self.assertTrue((self.a12 - self.a12).is_zero())
-        self.assertEqual(self.a12 + self.a12 + self.a12 + self.b12 + self.b12, 3 * self.a12 + 2 * self.b12)
         self.assertTrue((self.a12 * self.b12 / self.b12 / self.a12).is_one())
         self.assertEqual(self.a12 ** 3, self.a12 * self.a12 * self.a12)
 

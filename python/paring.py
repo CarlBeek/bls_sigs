@@ -14,9 +14,10 @@ def untwist(P):
     q = P.X.q
     root = Fq6(Fq2.zero(q), Fq2.one(q), Fq2.zero(q))
     zero = Fq6.zero(q)
+    # Todo: Speed up by saving omega**2 and omega**3 as constatnt
     omega2 = Fq12(root, zero)
     omega3 = Fq12(zero, root)
-    return EC.from_affine(omega2.inverse() * P.x, omega3.inverse() * P.y)
+    return EC.from_affine(omega2.inverse() * Fq12.to_cls(P.x, q), omega3.inverse() * Fq12.to_cls(P.y, q))
 
 
 def twist(P):
@@ -33,17 +34,20 @@ def twist(P):
 def line(_R, _Q, _P):
     if _R == _Q:
         _R = untwist(_R)
-        grad = (3 * _R.x.square()) / (2 * _R.y)
+        grad = (_R.x.to_cls(3, _R.x.q) * _R.x.square()) / (_R.x.to_cls(2, _R.x.q) * _R.y)
         offset = _R.y - grad * _R.x
     else:
         _R = untwist(_R)
         _Q = untwist(_Q)
         if _R == - _Q:
-            print(_P.x - _R.x)
             return _P.x - _R.x
         grad = (_Q.y - _R.y) / (_Q.x - _R.x)
         offset = (_Q.y * _R.x - _R.y * _Q.x) / (_R.x - _Q.x)
-    return (- grad * _P.x) + _P.y - offset
+    # print(type(grad))
+    # print(type(_P.x))
+    _Px = grad.to_cls(_P.x, _P.x.q)
+    _Py = grad.to_cls(_P.y, _P.y.q)
+    return (- grad * _Px) + _Py - offset
 
 
 def millers_alg(P, Q):
