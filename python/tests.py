@@ -65,10 +65,11 @@ class TestFields(unittest.TestCase):
 
 class TestParams(unittest.TestCase):
     def test_frobenius_coefficients(self):
+        all_one_poly = Fq2(Fq.one(q), Fq.one(q))
         self.assertEqual((Fq(1, q), Fq(-1, q)), FROB_FQ2)
-        self.assertEqual(tuple(Fq2.all_one_poly(q) ** (((q ** i) - 1) // 3) for i in range(0, 6)), FROB_FQ6_C1)
-        self.assertEqual(tuple(Fq2.all_one_poly(q) ** (((2 * q ** i) - 2) // 3) for i in range(0, 6)), FROB_FQ6_C2)
-        self.assertEqual(tuple(Fq2.all_one_poly(q) ** (((q ** i) - 1) // 6) for i in range(0, 12)), FROB_FQ12_C1)
+        self.assertEqual(tuple(all_one_poly ** (((q ** i) - 1) // 3) for i in range(0, 6)), FROB_FQ6_C1)
+        self.assertEqual(tuple(all_one_poly ** (((2 * q ** i) - 2) // 3) for i in range(0, 6)), FROB_FQ6_C2)
+        self.assertEqual(tuple(all_one_poly ** (((q ** i) - 1) // 6) for i in range(0, 12)), FROB_FQ12_C1)
 
 
 class TestEC(unittest.TestCase):

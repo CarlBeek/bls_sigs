@@ -14,7 +14,6 @@ class EC(object):
     def __str__(self):
         if self.is_infinity():
             return 'Infinity'
-            return 'Infinity'
         return 'X = ' + str(self.X) + ', Y = ' + str(self.Y) + ', Z = ' + str(self.Z)
 
     def __neg__(self):
@@ -151,12 +150,12 @@ class TwistedEC(EC):
     def is_on_curve(self):
         if self.is_infinity():
             return True
-        return self.y**2 == self.x**3 + params.b * self.x.all_one_poly(self.x.q)  # All one poly needed for twisted curve in Fq2
+        return self.y**2 == self.x**3 + params.twisted_b
 
     @classmethod
     def get_point_from_x(cls, X, greatest=False):
         try:
-            X3b = X ** 3 + params.b * X.all_one_poly(X.q)  # All one poly needed for twisted curve in Fq2
+            X3b = X ** 3 + params.twisted_b
             Y = X3b.sqrt()
         except ArithmeticError as e:
             raise ValueError('Point is not on curve') from e

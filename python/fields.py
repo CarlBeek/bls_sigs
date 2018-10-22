@@ -93,10 +93,6 @@ class Fq(int):
         return cls(1, q)
 
     @classmethod
-    def all_one_poly(cls, q):
-        return cls.one(q)
-
-    @classmethod
     def to_cls(cls, obj, q):
         if isinstance(obj, cls):
             return obj
@@ -228,10 +224,6 @@ class Fq2(tuple):
     @classmethod
     def one(cls, q):
         return cls.to_cls(Fq.one(q), q)
-
-    @classmethod
-    def all_one_poly(cls, q):
-        return cls(Fq.one(q), Fq.one(q))
 
     @classmethod
     def to_cls(cls, obj, q):
