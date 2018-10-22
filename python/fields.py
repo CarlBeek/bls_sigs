@@ -8,6 +8,12 @@ class Fq(int):
     def __str__(self):
         return super().__str__()
 
+    def __iter__(self):
+        return iter([self])
+
+    def __len__(self):
+        return 1
+
     def __add__(self, other):
         return Fq(super().__add__(other), self.q)
 
@@ -65,7 +71,7 @@ class Fq(int):
         # Simplified Tonelli-Shanks for q==3 mod 4
         # https://eprint.iacr.org/2012/685.pdf  Algorithm 2
         assert self.q % 4 == 3
-        a1 = self ** ((self.q - 3)/4)
+        a1 = self ** ((self.q - 3) // 4)  # Todo: this can be spead up with frobrenius endos
         a0 = a1.square() * self
         if a0 == Fq(-1, a0.q):
             raise ArithmeticError('The square root does not exist.')
@@ -195,8 +201,8 @@ class Fq2(tuple):
     def sqrt(self):
         # Modified Tonelli-Shanks for q==3 mod 4
         # https://eprint.iacr.org/2012/685.pdf  Algorithm 9
-        assert self.q%4==3 # q%4 == 3 This can ultimately be removed for BLS12-381
-        a1 = self ** ((self.q - 3) / 4)
+        assert self.q % 4 == 3 # q%4 == 3 This can ultimately be removed for BLS12-381
+        a1 = self ** ((self.q - 3) // 4) # Todo: this can be spead up with frobrenius endos
         alpha = a1.square() * self
         a0 = alpha**(self.q+1)
 
@@ -206,7 +212,7 @@ class Fq2(tuple):
         if alpha == -Fq2.one(self.q):
             # This returns i*x0 (i=sqrt(-1))
             return self.__class__(Fq(0, self.q), Fq(-1, self.q).sqrt())*x0
-        b = (self.__class__.one(self.q) + alpha)**((self.q - 1)//2)
+        b = (alpha + 1)**((self.q - 1)//2) # Todo: this can be spead up with frobrenius endos
         return b * x0
 
     def frobenius_endo(self, power):

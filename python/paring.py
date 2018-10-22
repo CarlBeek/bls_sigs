@@ -57,45 +57,92 @@ def millers_alg(P, Q):
             l_RQ = line(R, Q, P)
             f *= l_RQ
             R += Q
-    # if params.BLS_negative:
-    #     f = -f
+    if params.BLS_negative:
+        f = -f
     return f
 
 
 def final_exp(r):
-    return r ** ((params.q ** 12 - 1) // params.r)
-    # f2 = r.inverse()
-    # r = -r
-    # r *= f2
-    # r = r.frobenius_endo(2)
-    # r *= f2
-    #
-    # def exp_by_x(_f, _x):
-    #     _f = _f ** _x
-    #     if params.BLS_negative:
-    #         _f = -_f
-    #     return _f
-    #
-    # x = params.BLS_x
-    # y0 = r
-    # y0 = y0.square()
-    # y1 = exp_by_x(y0, x)
-    # y2 = exp_by_x(y1, x >> 1)
-    # y3 = -r
-    # y1 *= y3
-    # y1 = -y1
-    # y1 *= y2
-    # y2 = exp_by_x(y1, x)
-    # y3 = exp_by_x(y2, x)
-    # y3 *= -y1
-    # y1 = y1.frobenius_endo(3)
-    # y2 = y2.frobenius_endo(2)
-    # y1 *= y2
-    # y2 = exp_by_x(y3, x)
-    # y2 *= y0
-    # y2 *= r
-    # y1 *= y2
-    # y2 = y3.frobenius_endo(1)
-    # y1 *= y2
-    # return y1
+    # Calculate exponentiation via "easy" and "hard" parts
+    # https://eprint.iacr.org/2008/490.pdf
+
+    # Easy part:
+    m0 = r.frobenius_endo(6)
+    m0 *= r.inverse()
+    m = m0.frobenius_endo(2)
+    m *= m0
+
+    def exp_by_x(_f, _x):
+        _f = _f ** _x
+        if params.BLS_negative:
+            _f = -_f
+        return _f
+
+    return m ** ((params.q**4 - params.q**2 + 1)//params.r)
+    # Hard part:
+    # Setup needed vars
+    m_x = exp_by_x(m, params.BLS_x)
+    m_x_2 = exp_by_x(m_x, params.BLS_x)
+    m_x_3 = exp_by_x(m_x_2, params.BLS_x)
+    m_p = m.frobenius_endo(1)
+    m_p_2 = m.frobenius_endo(2)
+    m_p_3 = m.frobenius_endo(3)
+    m_x_p = m_x.frobenius_endo(1)
+    m_x_2_p = m_x_2.frobenius_endo(1)
+    m_x_3_p = m_x_3.frobenius_endo(1)
+    m_x_2_p_2 = m_x_2.frobenius_endo(2)
+
+    y0 = m_p * m_p_2 * m_p_3
+    y1 = - m
+    y2 = m_x_2_p_2
+    y3 = - m_x_p
+    y4 = - (m_x * m_x_2_p)
+    y5 = - m_x_2
+    y6 = - (m_x_3 * m_x_3_p)
+
+    return y0 * (y1 ** 2) * (y2 ** 6) * (y3 ** 12) * (y4 ** 18) * (y5 ** 30) * (y6 ** 36)
+    # t0 = y6.square()
+    # t0 *= y4
+    # t0 *= y5
+    # t1 = y3 * y5
+    # t1 *= t0
+    # t0 *= y2
+    # t1 = t1.square()
+    # t1 *= t0
+    # t1 = t1.square()
+    # t0 = t1 * y1
+    # t1 *= y0
+    # t0 = t0.square()
+    # t0 *= t1
+    # return t0
+
+
+
+# def final_exp(r):
+#     f1 = r.frobenius_endo(6)
+#     f2 = r.inverse()
+#     f = f1 * f2
+#     f *= f.frobenius_endo(2)
+#     ft1 = f ** params.BLS_x
+#     ft2 = ft1 ** params.BLS_x
+#     ft3 = ft2 ** params.BLS_x
+#     fp1 = f.frobenius_endo(1)
+#     fp2 = f.frobenius_endo(2)
+#     fp3 = f.frobenius_endo(3)
+#     y0 = fp1*fp2 *fp3
+#     y1 = f1
+#     y2 = ft2.frobenius_endo(2)
+#     y3 = - ft3.frobenius_endo(1)
+#     y4 = - (ft2.frobenius_endo(1)*ft1)
+#     y5 = - ft2
+#     y6 = - (ft3.frobenius_endo(1)*ft3)
+#     t0 = y6.square() * y4 * y5
+#     t1 = y3 * y5 * t0
+#     t0 *= y2
+#     t1 = (t1.square() * t0).square()
+#     t0 = t1 * y1
+#     t1 *= y0
+#     t0 = t0.square()
+#     return t0 * t1
+
 

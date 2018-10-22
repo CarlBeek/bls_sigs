@@ -4,7 +4,7 @@ from random import uniform
 from fields import Fq, Fq2, Fq6, Fq12
 from ec import EC, TwistedEC
 from params import q, r, g1_x, g1_y, g2_x, g2_y, FROB_FQ2, FROB_FQ6_C1, FROB_FQ6_C2, FROB_FQ12_C1
-from BLS import sign, verify, key_gen
+from BLS import sign, verify, key_gen, compress, decompress
 from paring import twist, untwist, paring
 
 
@@ -164,6 +164,10 @@ class TestParing(unittest.TestCase):
 
     def test_sigs_aggregate(self):
         self.assertTrue(verify(self.msg_0, self.sigma_0_0 + self.sigma_0_1, self.pk_0 + self.pk_1))
+
+    def test_point_compression(self):
+        self.assertEqual(self.sigma_0_0, decompress(compress(self.sigma_0_0)))
+        self.assertEqual(self.sigma_1_1, decompress(compress(self.sigma_1_1)))
 
 
 if __name__ == '__main__':
