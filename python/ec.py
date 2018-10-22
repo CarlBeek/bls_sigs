@@ -1,5 +1,6 @@
 import params
 
+
 class EC(object):
     def __init__(self, X, Y, Z):
         self.X = X

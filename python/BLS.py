@@ -3,6 +3,7 @@ from params import g1_x, g1_y, g2_x, g2_y, q, q_bits
 from ec import EC, TwistedEC
 from fields import Fq, Fq2
 
+
 g1 = EC.from_affine(g1_x, g1_y)
 g2 = TwistedEC.from_affine(g2_x, g2_y)
 

@@ -44,8 +44,6 @@ class Fq(int):
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
-        # Todo: Make constant time(ish)
-        # Definatly not constant time crypto!
         power = bin(int(power))
         power = power[2:]  # Removes '0b' from number
         ret = self.__class__.one(self.q)
@@ -154,8 +152,6 @@ class Fq2(tuple):
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
-        # Todo: Make constant time(ish)
-        # Definatly not constant time crypto!
         power = bin(int(power))
         power = power[2:]  # Removes '0b' from number
         ret = self.__class__.one(self.q)
@@ -331,8 +327,6 @@ class Fq6(tuple):
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
-        # Todo: Make constant time(ish)
-        # Definatly not constant time crypto!
         power = bin(int(power))
         power = power[2:]  # Removes '0b' from number
         ret = self.__class__.one(self.q)
@@ -498,8 +492,6 @@ class Fq12(tuple):
 
     def __pow__(self, power):
         # Basic square and multiply algorithm
-        # Todo: Make constant time(ish)
-        # Definatly not constant time crypto!
         power = bin(int(power))
         power = power[2:]  # Removes '0b' from number
         ret = self.__class__.one(self.q)

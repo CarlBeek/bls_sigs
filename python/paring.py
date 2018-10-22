@@ -49,7 +49,7 @@ def line(_R, _Q, _P):
 def millers_alg(P, Q):
     R = Q
     f = Fq12.one(params.q)
-    for r_i in bin(params.BLS_x )[3:]:
+    for r_i in bin(params.BLS_x)[3:]:
         l_RR = line(R, R, P)
         f = f.square() * l_RR
         R *= 2
@@ -100,49 +100,17 @@ def final_exp(r):
     y5 = - m_x_2
     y6 = - (m_x_3 * m_x_3_p)
 
-    return y0 * (y1 ** 2) * (y2 ** 6) * (y3 ** 12) * (y4 ** 18) * (y5 ** 30) * (y6 ** 36)
-    # t0 = y6.square()
-    # t0 *= y4
-    # t0 *= y5
-    # t1 = y3 * y5
-    # t1 *= t0
-    # t0 *= y2
-    # t1 = t1.square()
-    # t1 *= t0
-    # t1 = t1.square()
-    # t0 = t1 * y1
-    # t1 *= y0
-    # t0 = t0.square()
-    # t0 *= t1
-    # return t0
-
-
-
-# def final_exp(r):
-#     f1 = r.frobenius_endo(6)
-#     f2 = r.inverse()
-#     f = f1 * f2
-#     f *= f.frobenius_endo(2)
-#     ft1 = f ** params.BLS_x
-#     ft2 = ft1 ** params.BLS_x
-#     ft3 = ft2 ** params.BLS_x
-#     fp1 = f.frobenius_endo(1)
-#     fp2 = f.frobenius_endo(2)
-#     fp3 = f.frobenius_endo(3)
-#     y0 = fp1*fp2 *fp3
-#     y1 = f1
-#     y2 = ft2.frobenius_endo(2)
-#     y3 = - ft3.frobenius_endo(1)
-#     y4 = - (ft2.frobenius_endo(1)*ft1)
-#     y5 = - ft2
-#     y6 = - (ft3.frobenius_endo(1)*ft3)
-#     t0 = y6.square() * y4 * y5
-#     t1 = y3 * y5 * t0
-#     t0 *= y2
-#     t1 = (t1.square() * t0).square()
-#     t0 = t1 * y1
-#     t1 *= y0
-#     t0 = t0.square()
-#     return t0 * t1
-
-
+    t0 = y6.square()
+    t0 *= y4
+    t0 *= y5
+    t1 = y3 * y5
+    t1 *= t0
+    t0 *= y2
+    t1 = t1.square()
+    t1 *= t0
+    t1 = t1.square()
+    t0 = t1 * y1
+    t1 *= y0
+    t0 = t0.square()
+    t0 *= t1
+    return t0
