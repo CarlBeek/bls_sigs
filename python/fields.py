@@ -1,5 +1,5 @@
 class Fq(int):
-    def __new__(cls, x: int, q: int):
+    def __init__(cls, x: int, q: int):
         x = x % q
         ret = super().__new__(cls, x)
         ret.q = q
@@ -100,6 +100,12 @@ class Fq(int):
 
 
 class ExtensionField(tuple):
+    def __new__(cls, elems, q):
+        ret = super.__new__(elems)
+        ret.q = q
+        ret.order = len(ret)
+        return ret
+
     def __neg__(self):
         return self.__class__(*(-a for a in self))
 
@@ -137,27 +143,12 @@ class ExtensionField(tuple):
                 ret *= self
         return ret
 
+    def __gt__(self, other):
+        for values in zip(self, other):
+            
+
     def __lt__(self, other):
         return not (self > other and self == other)
-
-    @property
-    def q(self):
-        return self[0].q
-
-    @property
-    def c0(self):
-        return self[0]
-
-    @property
-    def c1(self):
-        return self[1]
-
-    @property
-    def c2(self):
-        try:
-            return self[2]
-        except IndexError as e:
-            raise IndexError("This field doesn't have a c2 element") from e
 
 
 class Fq2(ExtensionField):
@@ -165,10 +156,10 @@ class Fq2(ExtensionField):
         return super().__new__(cls, (c0, c1))
 
     def __mul__(self, other):
-        aa = self.c0 * other.c0
-        bb = self.c1 * other.c1
-        o = other.c0 + other.c1
-        c1 = self.c1 + self.c0
+        aa = self[0] * other[0]
+        bb = self[1] * other[1]
+        o = other[0] + other[1]
+        c1 = self[1] + self[0]
         c1 *= o
         c1 -= aa
         c1 -= bb
