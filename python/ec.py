@@ -1,6 +1,5 @@
 import params
 
-
 class EC(object):
     def __init__(self, X, Y, Z):
         self.X = X
@@ -123,15 +122,11 @@ class EC(object):
     def basefield_one(self):
         return self.X.one(self.X.q)
 
-    # @property
-    # def basefield(self):
-    #     return self.X.__class__
-
     @classmethod
     def from_affine(cls, x, y, infinity=False):
         if infinity:
-            return cls(x, y, x.zero(x.q))
-        return cls(x, y, x.one(x.q))
+            return cls(x, y, x.zero(x.degree, x.q))
+        return cls(x, y, x.one(x.degree, x.q))
 
     @classmethod
     def get_point_from_x(cls, X, greatest=False):
