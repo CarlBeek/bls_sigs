@@ -93,7 +93,7 @@ class EC(object):
         return self.__class__(X3, Y3, Z3)
 
     def is_infinity(self):
-        return self.Z.is_zero()
+        return self.Z == 0
 
     def is_on_curve(self):
         if self.is_infinity():
@@ -116,11 +116,11 @@ class EC(object):
 
     @property
     def basefield_zero(self):
-        return self.X.zero(self.X.q)
+        return self.X.zero(self.X.degree, self.X.q)
 
     @property
     def basefield_one(self):
-        return self.X.one(self.X.q)
+        return self.X.one(self.X.degree, self.X.q)
 
     @classmethod
     def from_affine(cls, x, y, infinity=False):
@@ -154,9 +154,10 @@ class TwistedEC(EC):
     def get_point_from_x(cls, X, greatest=False):
         try:
             X3b = X ** 3 + params.twisted_b
+            print(X3b)
             Y = X3b.sqrt()
         except ArithmeticError as e:
             raise ValueError('Point is not on curve') from e
         if greatest != (Y > - Y):
             Y = - Y
-        return cls(X, Y, X.one(X.q))
+        return cls(X, Y, X.one(X.degree, X.q))

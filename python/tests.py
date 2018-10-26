@@ -67,50 +67,50 @@ class TestParams(unittest.TestCase):
         self.assertEqual(tuple(all_one_poly ** (((2 * q ** i) - 2) // 3) for i in range(0, 6)), FROB_FQ6_C2)
         self.assertEqual(tuple(all_one_poly ** (((q ** i) - 1) // 6) for i in range(0, 12)), FROB_FQ12_C1)
 
-#
-# class TestEC(unittest.TestCase):
-#     def setUp(self):
-#         self.a1 = Fq(48, 199)
-#         self.b1 = Fq(50, 199)
-#         self.c1 = Fq(62, 199)
-#         self.A1 = EC.get_point_from_x(self.a1)
-#         self.B1 = EC.get_point_from_x(self.b1)
-#
-#         self.a2 = Fq2(self.b1, self.a1)
-#         self.b2 = Fq2(self.b1, self.c1)
-#         self.A2 = TwistedEC.get_point_from_x(self.a2)
-#         self.B2 = TwistedEC.get_point_from_x(self.b2)
-#
-#         self.g1 = EC.from_affine(g1_x, g1_y)
-#         self.g2 = TwistedEC.from_affine(g2_x, g2_y)
-#
-#     def test_EC_over_Fq(self):
-#         self.assertTrue(self.A1.is_on_curve())
-#         self.assertEqual(self.A1 + self.A1, self.A1.double())
-#         self.assertTrue((self.A1 + self.A1).is_on_curve())
-#         self.assertTrue(self.A1.double().is_on_curve())
-#         self.assertTrue((self.A1 * 100).is_on_curve())
-#         self.assertTrue((self.A1 - self.A1).is_infinity())
-#         self.assertEqual((self.A1 + EC.infinity(self.a1)), self.A1)
-#         self.assertEqual(self.A1 + self.A1 + self.A1 + self.B1 + self.B1, 3 * self.A1 + 2 * self.B1)
-#
-#     def test_twisted_EC_over_Fq2(self):
-#         self.assertTrue(self.A2.is_on_curve())
-#         self.assertEqual(self.A2 + self.A2, self.A2.double())
-#         self.assertTrue((self.A2 + self.A2).is_on_curve())
-#         self.assertTrue(self.A2.double().is_on_curve())
-#         self.assertTrue((self.A2*100).is_on_curve())
-#         self.assertTrue((self.A2 - self.A2).is_infinity())
-#         self.assertEqual((self.A2 + EC.infinity(self.a2)), self.A2)
-#         self.assertEqual(self.A2 + self.A2 + self.A2 + self.B2 + self.B2, 3 * self.A2 + 2 * self.B2)
-#
-#     def test_g1_on_curve(self):
-#         self.assertTrue(self.g1.is_on_curve())
-#         self.assertTrue((self.g1 * 5).is_on_curve())
-#
-#     def test_g2_on_curve(self):
-#         self.assertTrue(self.g2.is_on_curve())
-#         self.assertTrue((self.g2 * 5).is_on_curve())
+
+class TestEC(unittest.TestCase):
+    def setUp(self):
+        self.a1 = Fq(48, 199)
+        self.b1 = Fq(50, 199)
+        self.c1 = Fq(62, 199)
+        self.A1 = EC.get_point_from_x(self.a1)
+        self.B1 = EC.get_point_from_x(self.b1)
+
+        self.a2 = Fq2((self.b1, self.a1), self.a1.q)
+        self.b2 = Fq2((self.b1, self.c1), self.b1.q)
+        self.A2 = TwistedEC.get_point_from_x(self.a2)
+        self.B2 = TwistedEC.get_point_from_x(self.b2)
+
+        self.g1 = EC.from_affine(g1_x, g1_y)
+        self.g2 = TwistedEC.from_affine(g2_x, g2_y)
+
+    def test_EC_over_Fq(self):
+        self.assertTrue(self.A1.is_on_curve())
+        self.assertEqual(self.A1 + self.A1, self.A1.double())
+        self.assertTrue((self.A1 + self.A1).is_on_curve())
+        self.assertTrue(self.A1.double().is_on_curve())
+        self.assertTrue((self.A1 * 100).is_on_curve())
+        self.assertTrue((self.A1 - self.A1).is_infinity())
+        self.assertEqual((self.A1 + EC.infinity(self.a1)), self.A1)
+        self.assertEqual(self.A1 + self.A1 + self.A1 + self.B1 + self.B1, 3 * self.A1 + 2 * self.B1)
+    #
+    # def test_twisted_EC_over_Fq2(self):
+    #     self.assertTrue(self.A2.is_on_curve())
+    #     self.assertEqual(self.A2 + self.A2, self.A2.double())
+    #     self.assertTrue((self.A2 + self.A2).is_on_curve())
+    #     self.assertTrue(self.A2.double().is_on_curve())
+    #     self.assertTrue((self.A2*100).is_on_curve())
+    #     self.assertTrue((self.A2 - self.A2).is_infinity())
+    #     self.assertEqual((self.A2 + EC.infinity(self.a2)), self.A2)
+    #     self.assertEqual(self.A2 + self.A2 + self.A2 + self.B2 + self.B2, 3 * self.A2 + 2 * self.B2)
+    #
+    # def test_g1_on_curve(self):
+    #     self.assertTrue(self.g1.is_on_curve())
+    #     self.assertTrue((self.g1 * 5).is_on_curve())
+    #
+    # def test_g2_on_curve(self):
+    #     self.assertTrue(self.g2.is_on_curve())
+    #     self.assertTrue((self.g2 * 5).is_on_curve())
 #
 #
 # class TestParing(unittest.TestCase):

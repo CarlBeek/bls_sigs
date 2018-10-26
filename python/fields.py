@@ -190,6 +190,12 @@ class ExtensionField(tuple):
 class Fq2(ExtensionField):
     def __mul__(self, other):
         other = self.to_cls(other, self.degree, self.q)
+        try:
+            self[1]
+        except:
+            print(len(self))
+            print(self)
+            print(other)
         aa = self[0] * other[0]
         bb = self[1] * other[1]
         o = other[0] + other[1]
