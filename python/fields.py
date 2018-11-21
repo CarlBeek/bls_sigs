@@ -109,13 +109,15 @@ class Fqx(object):
         return Fqx(((o - s) % q for s, o in zip(self.elems, other.elems)))
 
     def __mul__(self, other):
-        ret = [0]*(self.deg + other.deg -2)
+        ret = [0]*(self.deg + other.deg-1)
         # Multiply all elememnts of the same order
         for i, elem_self in enumerate(self.elems):
             for j, elem_other in enumerate(other.elems):
                 ret[i + j] += elem_self * elem_other
         # Todo: divide by polynomial
-        ret = poly_long_div(ret, self.mod_poly)
+        print(ret)
+        ret = poly_long_div(ret, self.mod_poly, q)
+        print(ret)
         return self.__class__((n % q for n in ret))
 
     def __rmul__(self, other):
@@ -167,7 +169,7 @@ class Fqx(object):
 
 class Fq2(Fqx):
     def __init__(self, elems):
-        self.elems = elems
+        self.elems = tuple(elems) if not isinstance(elems, tuple) else elems  # gets rid of potential generator
         self.deg = 2
         self.mod_poly = [0, 1]
 
@@ -241,12 +243,11 @@ class Fq12(Fqx):
 
 def costly_func():
     a = Fq2((2, 2))
-    return(a + a)
+    print(a.sqrt())
+    return(a * a)
 
 if __name__ == '__main__':
     import timeit
-    # print(timeit.timeit(costly_func))
-    a = [1, 1, 1, 1]
-    b = [1, 1]
-    print(poly_long_div(a, b, q))
-
+    number = 1000000
+    # print(timeit.timeit(costly_func, number=number)/number)
+    print(costly_func())
