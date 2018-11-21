@@ -1,5 +1,19 @@
-q = 21888242871839275222246405745257275088696311157297823662689037894645226208583
+q = 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab
+# Fq2_poly_coeffs = (1, 0)
+# Fq12_poly_coeffs =
 
+
+def fq_inv(x, q):
+    # Extended euclidean alg
+    t = 0
+    new_t = 1
+    r = q
+    new_r = x
+    while new_r:
+        q = r // new_r
+        t, new_t = new_t, t - q * new_t
+        r, new_r = new_r, r - q * new_r
+    return t
 
 class Fq(object):
     def __init__(self, n):
@@ -53,15 +67,7 @@ class Fq(object):
         return self.n < other.n
 
     def inverse(self):
-        t = 0
-        new_t = 1
-        r = self.q
-        new_r = self.n
-        while new_r:
-            q = r // new_r
-            t, new_t = new_t, t - q * new_t
-            r, new_r = new_r, r - q * new_r
-        return Fq(t)
+        return Fq(fq_inv(self.n, q))
 
     def sqrt(self):
         # Simplified Tonelli-Shanks for q==3 mod 4
@@ -74,9 +80,21 @@ class Fq(object):
         return a1*self.n
 
 
+def poly_long_div(num, denum, q):
+    res_order = len(denum) - len(num)
+    for i in range(-1, res_order-2, -1):
+        mul = num[i] * fq_inv(denum[-1], q)
+        for j in range(-2, -len(denum)-1, -1):
+            num[i+j+1] -= denum[j]*mul
+    return num[res_order-1:]
+
+
 class Fqx(object):
     def __init__(self, elems):
+        elems = tuple(elems) if not isinstance(elems, tuple) else elems # Needed to call len(elems) later (if generator)
         self.elems = elems
+        self.deg = len(elems)
+        self.mod_poly = [0] # This is intentionally useless as mod the 0 poly is a fixed point
 
     def __add__(self, other):
         return Fqx(((s + o) % q for s, o in zip(self.elems, other.elems)))
@@ -91,13 +109,23 @@ class Fqx(object):
         return Fqx(((o - s) % q for s, o in zip(self.elems, other.elems)))
 
     def __mul__(self, other):
-        pass
+        ret = [0]*(self.deg + other.deg -2)
+        # Multiply all elememnts of the same order
+        for i, elem_self in enumerate(self.elems):
+            for j, elem_other in enumerate(other.elems):
+                ret[i + j] += elem_self * elem_other
+        # Todo: divide by polynomial
+        ret = poly_long_div(ret, self.mod_poly)
+        return self.__class__((n % q for n in ret))
 
     def __rmul__(self, other):
         self * other
 
-    def __truediv__(self, other):
+    def __div__(self, other):
         return self * other.inverse()
+
+    def __truediv__(self, other):
+        return self.__div__(other)
 
     def __rdiv__(self, other):
         return self.inverse() * other
@@ -130,15 +158,19 @@ class Fqx(object):
                 ret *= self
         return ret
 
+    def int_mul(self, n):
+        return self.__class__(((x*n) % q for x in self.elems))
+
     def inverse(self):
         pass
 
-    @property
-    def deg(self):
-        return len(self.elems)
-
 
 class Fq2(Fqx):
+    def __init__(self, elems):
+        self.elems = elems
+        self.deg = 2
+        self.mod_poly = [0, 1]
+
     def sqrt(self):
         # Modified Tonelli-Shanks for q==3 mod 4
         # https://eprint.iacr.org/2012/685.pdf  Algorithm 9
@@ -213,6 +245,8 @@ def costly_func():
 
 if __name__ == '__main__':
     import timeit
-
-    print(timeit.timeit(costly_func))
+    # print(timeit.timeit(costly_func))
+    a = [1, 1, 1, 1]
+    b = [1, 1]
+    print(poly_long_div(a, b, q))
 
